@@ -13,52 +13,112 @@
 # limitations under the License.
 
 import pyspark.sql.types as types
-from processor.geo_operations import country, city, aarea
 
 class TransformationOperations:
-    def __init__(self, geoip_paths):
+    def __init__(self):
+        self.reference = {
+            "seal.t1" : {
+                "t_low"   : -100,
+                "t_hi"    : +500,
+                "rpm_low" : 2000,
+                "rpm_hi"  : 3000,
+                "p_low"   : 200,
+                "p_hi"    : 1500
+            },
+            "seal.t2" : {
+                "t_low"   : -50,
+                "t_hi"    : +700,
+                "rpm_low" : 2000,
+                "rpm_hi"  : 3000,
+                "p_low"   : 700,
+                "p_hi"    : 3500
+            }
+        }
+
         self.operations_dict = {
-            "sum": {
+            "add": {
                 "operands": 2,
-                "types": [types.LongType(), types.LongType()],
-                "result": types.LongType(),
+                "types": [types.DoubleType(), types.DoubleType()],
+                "result": types.DoubleType(),
                 "lambda": lambda x, y: x + y
             },
-            "minus": {
+            "sub": {
                 "operands": 2,
-                "types": [types.LongType(), types.LongType()],
-                "result": types.LongType(),
+                "types": [types.DoubleType(), types.DoubleType()],
+                "result": types.DoubleType(),
                 "lambda": lambda x, y: x - y
             },
-            "mult": {
+            "mul": {
                 "operands": 2,
-                "types": [types.LongType(), types.LongType()],
-                "result": types.LongType(),
+                "types": [types.DoubleType(), types.DoubleType()],
+                "result": types.DoubleType(),
                 "lambda": lambda x, y: x * y
             },
             "div": {
                 "operands": 2,
-                "types": [types.LongType(), types.LongType()],
-                "result": types.LongType(),
+                "types": [types.DoubleType(), types.DoubleType()],
+                "result": types.DoubleType(),
                 "lambda": lambda x, y: x / y
             },
-            "country": {
-                "operands": 1,
-                "types": [types.StringType()],
-                "result": types.StringType(),
-                "lambda": lambda ip: country(ip, geoip_paths["country"])
+            "lt": {
+                "operands": 2,
+                "types": [types.DoubleType(), types.DoubleType()],
+                "result": types.LongType(),
+                "lambda": lambda x, y: 1 if x < y else 0
             },
-            "city": {
-                "operands": 1,
-                "types": [types.StringType()],
-                "result": types.StringType(),
-                "lambda": lambda ip: city(ip, geoip_paths["city"])
+            "le": {
+                "operands": 2,
+                "types": [types.DoubleType(), types.DoubleType()],
+                "result": types.LongType(),
+                "lambda": lambda x, y: 1 if x <= y else 0
             },
-            "aarea": {
+            "gt": {
+                "operands": 2,
+                "types": [types.DoubleType(), types.DoubleType()],
+                "result": types.LongType(),
+                "lambda": lambda x, y: 1 if x > y else 0
+            },
+            "ge": {
+                "operands": 2,
+                "types": [types.DoubleType(), types.DoubleType()],
+                "result": types.LongType(),
+                "lambda": lambda x, y: 1 if x >= y else 0
+            },
+            "eq": {
+                "operands": 2,
+                "types": [types.DoubleType(), types.DoubleType()],
+                "result": types.LongType(),
+                "lambda": lambda x, y: 1 if abs(x - y) < 0.0001 else 0
+            },
+            "count": {
+                "operands": 1,
+		"types": [types.LongType()],
+                "result": types.LongType(),
+                "lambda": lambda x: 1
+            },
+            "id": {
+                "operands": 1,
+                "types": [types.DoubleType()],
+                "result": types.DoubleType(),
+                "lambda": lambda x: x
+            },
+            "reference_rpm_hi": {
                 "operands": 1,
                 "types": [types.StringType()],
-                "result": types.StringType(),
-                "lambda": lambda ip: aarea(ip, geoip_paths["asn"])
+                "result": types.DoubleType(),
+                "lambda": lambda dt: self.reference[dt]['rpm_hi']
+            },
+            "reference_rpm_low": {
+                "operands": 1,
+                "types": [types.StringType()],
+                "result": types.DoubleType(),
+                "lambda": lambda dt: self.reference[dt]['rpm_low']
+            },
+            "round": {
+                "operands": 2,
+                "types": [types.DoubleType(), types.IntegerType()],
+                "result": types.FloatType(),
+                "lambda": lambda num, digits: round(num, digits)
             },
             "truncate": {
                 "operands": 2,

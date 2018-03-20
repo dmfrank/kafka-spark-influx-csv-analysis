@@ -18,25 +18,45 @@ from pyspark.sql.types import LongType, DoubleType, FloatType, IntegerType, Shor
 class SupportedReduceOperations:
     def __init__(self):
         self.operation = {
-            "Sum": {
+            "lSum": {
                 "ref_to_func": lambda x, y: x + y,
                 "input_type": LongType(),
                 "output_type": LongType()
             },
-            "Mult": {
+            "lMult": {
                 "ref_to_func": lambda x, y: x * y,
                 "input_type": LongType(),
                 "output_type": LongType()
             },
-            "Min": {
+            "lMin": {
                 "ref_to_func": lambda x, y: x if x < y else y,
                 "input_type": LongType(),
                 "output_type": LongType()
             },
-            "Max": {
+            "lMax": {
                 "ref_to_func": lambda x, y: x if x > y else y,
                 "input_type": LongType(),
                 "output_type": LongType()
+            },
+            "dSum": {
+                "ref_to_func": lambda x, y: x + y,
+                "input_type": DoubleType(),
+                "output_type": DoubleType()
+            },
+            "dMult": {
+                "ref_to_func": lambda x, y: x * y,
+                "input_type": DoubleType(),
+                "output_type": DoubleType()
+            },
+            "dMin": {
+                "ref_to_func": lambda x, y: x if x < y else y,
+                "input_type": DoubleType(),
+                "output_type": DoubleType()
+            },
+            "dMax": {
+                "ref_to_func": lambda x, y: x if x > y else y,
+                "input_type": DoubleType(),
+                "output_type": DoubleType()
             }
         }
 
