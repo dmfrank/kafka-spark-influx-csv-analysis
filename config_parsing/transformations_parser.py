@@ -97,7 +97,7 @@ class TransformationsParser:
             return args
 
     def run(self):
-        tokenized_transformation = list(map(lambda field: field.strip(), self.transformations.split(";")))
+        tokenized_transformation = list(map(lambda field: field.strip(), self.transformations))
         for token in tokenized_transformation:
             if ":" not in token:  # if it's field
                 self.expanded_transformation.append(token.strip())

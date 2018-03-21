@@ -2,7 +2,7 @@
   "output": {
     "input_type": "bin",
     "options": {
-    "filename": "test/data/test.csv"
+      "filename": "test/data/test.csv"
     }
   },
   "databases": {
