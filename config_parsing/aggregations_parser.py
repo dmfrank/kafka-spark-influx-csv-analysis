@@ -112,7 +112,7 @@ class AggregationsParser:
         :return: return list of dictionaries. Every dictionary include next field: function = field with function,
             input_field = input field name from source data.
         """
-        separate_fields = self._input_rule.split(";")
+        separate_fields = self._input_rule
 
         output_list = []
         for field in separate_fields:
@@ -154,7 +154,7 @@ class AggregationsParser:
         :return: return list of dictionaries. Every dictionary include next field: function = field with function,
             input_field = input field name from source data.
         """
-        separate_fields = self._input_rule.split(";")
+        separate_fields = self._input_rule
 
         output_list = []
         for field in separate_fields:

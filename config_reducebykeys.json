@@ -25,10 +25,18 @@
     }
   },
   "processing": {
-    "transformation": "src_country: country(src_ip);  packet_size; traffic: mult(packet_size,sampling_rate)",
+    "transformation": [
+      "src_country: country(src_ip)",
+      "packet_size",
+      "traffic: mult(packet_size,sampling_rate)"
+    ],
     "aggregations": {
       "operation_type": "reduceByKey",
-      "rule": "Sum(traffic); key = (src_country); Max(packet_size)"
+      "rule": [
+        "Sum(traffic)",
+        "key = (src_country)",
+        "Max(packet_size)"
+      ]
     }
   },
   "analysis": {
@@ -75,10 +83,13 @@
           "batch_number": 3
         }
       },
-      { "module": "AverageAnalysis",
+      {
+        "module": "AverageAnalysis",
         "name": "AverageAnalysis",
         "options": {
-          "deviation": { "traffic": 4 },
+          "deviation": {
+            "traffic": 4
+          },
           "num_average": 3
         }
       }

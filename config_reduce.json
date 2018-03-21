@@ -14,7 +14,7 @@
     "method": "influx",
     "options": {
       "influx": {
-        "host":"localhost",
+        "host": "localhost",
         "port": 8086,
         "username": "root",
         "password": "root",
@@ -24,10 +24,20 @@
     }
   },
   "processing": {
-    "transformation": "packet_size;traffic: mult(packet_size,sampling_rate);ip_size;ip_size_sum:ip_size",
+    "transformation": [
+      "packet_size",
+      "traffic: mult(packet_size,sampling_rate)",
+      "ip_size",
+      "ip_size_sum: ip_size"
+    ],
     "aggregations": {
       "operation_type": "reduce",
-      "rule": " Max(packet_size); Sum(traffic); Min(ip_size); Sum(ip_size_sum)"
+      "rule": [
+        "Max(packet_size)",
+        "Sum(traffic)",
+        "Min(ip_size)",
+        "Sum(ip_size_sum)"
+      ]
     }
   },
   "analysis": {
@@ -70,10 +80,13 @@
           "batch_number": 3
         }
       },
-      { "module": "AverageAnalysis",
+      {
+        "module": "AverageAnalysis",
         "name": "AverageAnalysis",
         "option": {
-          "deviation": { "traffic": 4 },
+          "deviation": {
+            "traffic": 4
+          },
           "num_average": 3
         }
       }
