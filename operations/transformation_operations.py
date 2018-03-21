@@ -104,6 +104,15 @@ class Le(Boolean):
         super().__init__(self,"le", 2, lambda x,y: x <= y)
 
 
+class Cast(Operation):
+    def __init__(self,name, new_type, function):
+        super().__init__(self, name, 1, function)
+        self.ret_type = new_type
+
+    def result_type(self, arg_types = []):
+        return self.ret_type
+
+
 class TransformationOperations:
     def add(self, operation):
         self.operations_dict[operation.name] = operation
@@ -122,3 +131,9 @@ class TransformationOperations:
         self.add(Ge())
         self.add(Lt())
         self.add(Le())
+        self.add(Cast("long",types.LongType, lambda x: int(x)))
+        self.add(Cast("int", types.IntegerType, lambda x: int(x)))
+        self.add(Cast("float", types.FloatType, lambda x: float(x)))
+        self.add(Cast("double", types.DoubleType, lambda x: float(x)))
+        self.add(Cast("boolean", types.BooleanType, lambda x: bool(x)))
+        self.add(Cast("not", types.BooleanType, lambda x: not x))
