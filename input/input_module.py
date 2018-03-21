@@ -95,9 +95,8 @@ class KafkaStreaming(object):
         self._spark = SparkSession.builder.appName("StreamingDataKafka").getOrCreate()
         sc = self._spark.sparkContext
 
-        sc.addFile(config.content["databases"]["country"])
-        sc.addFile(config.content["databases"]["city"])
-        sc.addFile(config.content["databases"]["asn"])
+        for name, file in config.content["databases"].items():
+            sc.addFile(file)
 
         self._ssc = StreamingContext(sc, self._batchDuration)
 
