@@ -13,57 +13,112 @@
 # limitations under the License.
 
 import pyspark.sql.types as types
-from processor.geo_operations import country, city, aarea
+
+
+class Operation:
+    def __init__(self, name, op_count, func):
+        self.name = name
+        self.op_count = op_count
+        self.func = func
+
+    def result_type(self, arg_types = []):
+        raise NotImplemented("Should be implemented in concrete operation.")
+
+    @staticmethod
+    def get_larger_type(t=[]):
+
+        avail_types = [
+            types.BooleanType,
+            types.ByteType,
+            types.ShortType,
+            types.IntegerType,
+            types.LongType,
+            types.FloatType,
+            types.DoubleType
+        ]
+
+        if len(t) < 2:
+            raise IndexError("Should be at least 2 arguments.")
+
+        indexes = map(lambda x: avail_types.index(x), t)
+        rt = avail_types[max(indexes)]
+        return rt
+
+
+class UnarySameTypeOperation(Operation):
+    def __init__(self, name, func):
+        super().__init__(name, 1, func)
+
+    def result_type(self, arg_types):
+        arg_types[0]
+
+
+class Id(UnarySameTypeOperation):
+    def __init__(self):
+        super().__init__("id", lambda x: x)
+
+
+class GreatTypeCastedOperation(Operation):
+    def __init__(self, name, op_count, func):
+        super().__init__(self, name, op_count, func)
+
+    def result_type(self, arg_types):
+        return self.get_larger_type(arg_types)
+
+
+class MathDiv(Operation):
+    def __init__(self):
+        super().__init__(self, "mathdiv", 2, lambda x, y: x / float(y))
+
+    def result_type(self, arg_types = []):
+        return types.DoubleType
+
+
+class Boolean(Operation):
+    def result_type(self, arg_types = []):
+        return types.BooleanType
+
+
+class Eq(Boolean):
+    def __init__(self):
+        super().__init__(self,"eq", 2, lambda x,y: x == y)
+
+
+class Gt(Boolean):
+    def __init__(self):
+        super().__init__(self,"gt", 2, lambda x,y: x > y)
+
+
+class Ge(Boolean):
+    def __init__(self):
+        super().__init__(self,"ge", 2, lambda x,y: x >= y)
+
+
+class Lt(Boolean):
+    def __init__(self):
+        super().__init__(self,"lt", 2, lambda x,y: x < y)
+
+
+class Le(Boolean):
+    def __init__(self):
+        super().__init__(self,"le", 2, lambda x,y: x <= y)
+
 
 class TransformationOperations:
-    def __init__(self, geoip_paths):
-        self.operations_dict = {
-            "sum": {
-                "operands": 2,
-                "types": [types.LongType(), types.LongType()],
-                "result": types.LongType(),
-                "lambda": lambda x, y: x + y
-            },
-            "minus": {
-                "operands": 2,
-                "types": [types.LongType(), types.LongType()],
-                "result": types.LongType(),
-                "lambda": lambda x, y: x - y
-            },
-            "mult": {
-                "operands": 2,
-                "types": [types.LongType(), types.LongType()],
-                "result": types.LongType(),
-                "lambda": lambda x, y: x * y
-            },
-            "div": {
-                "operands": 2,
-                "types": [types.LongType(), types.LongType()],
-                "result": types.LongType(),
-                "lambda": lambda x, y: x / y
-            },
-            "country": {
-                "operands": 1,
-                "types": [types.StringType()],
-                "result": types.StringType(),
-                "lambda": lambda ip: country(ip, geoip_paths["country"])
-            },
-            "city": {
-                "operands": 1,
-                "types": [types.StringType()],
-                "result": types.StringType(),
-                "lambda": lambda ip: city(ip, geoip_paths["city"])
-            },
-            "aarea": {
-                "operands": 1,
-                "types": [types.StringType()],
-                "result": types.StringType(),
-                "lambda": lambda ip: aarea(ip, geoip_paths["asn"])
-            },
-            "truncate": {
-                "operands": 2,
-                "types": [types.StringType(), types.LongType()],
-                "result": types.StringType(),
-                "lambda": lambda long_string,length: long_string[:length]
-            }
-        }
+    def add(self, operation):
+        self.operations_dict[operation.name] = operation
+
+    def __init__(self):
+        self.operations_dict = {}
+        self.add(Id())
+        self.add(GreatTypeCastedOperation("add", lambda x, y: x + y))
+        self.add(GreatTypeCastedOperation("sub", lambda x, y: x - y))
+        self.add(GreatTypeCastedOperation("mul", lambda x, y: x * y))
+        self.add(GreatTypeCastedOperation("odd", lambda x, y: x % y))
+        self.add(GreatTypeCastedOperation("pydiv", lambda x, y: x / y))
+        self.add(MathDiv())
+        self.add(Eq())
+        self.add(Gt())
+        self.add(Ge())
+        self.add(Lt())
+        self.add(Le())
