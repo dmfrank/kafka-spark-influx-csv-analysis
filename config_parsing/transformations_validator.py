@@ -20,7 +20,7 @@ from errors import errors
 from .transformations_parser import FieldTransformation
 
 
-class TransformatoinsValidator:
+class TransformationsValidator:
     def __init__(self, transformation_operations, data_structure_pyspark):
         self.current_fields = data_structure_pyspark
         self.transformation_operations = transformation_operations
