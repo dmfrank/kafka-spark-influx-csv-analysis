@@ -20,16 +20,16 @@ class TransformationOperations:
             "seal.t1" : {
                 "t_low"   : -100,
                 "t_hi"    : +500,
-                "rpm_low" : 2000,
-                "rpm_hi"  : 3000,
+                "rpm_low" : 1000,
+                "rpm_hi"  : 4000,
                 "p_low"   : 200,
                 "p_hi"    : 1500
             },
             "seal.t2" : {
                 "t_low"   : -50,
                 "t_hi"    : +700,
-                "rpm_low" : 2000,
-                "rpm_hi"  : 3000,
+                "rpm_low" : 1000,
+                "rpm_hi"  : 4000,
                 "p_low"   : 700,
                 "p_hi"    : 3500
             }
