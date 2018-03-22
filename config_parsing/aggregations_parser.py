@@ -170,7 +170,7 @@ class AggregationsParser:
                         list_expression = []
                         key_field = re_match_key_field[0][1]
                         if self._check_unique_key_field(output_list):
-                            if (key_field.count("(") == key_field.count(")")):
+                            if key_field.count("(") == key_field.count(")"):
                                 key_field = key_field.replace("(", "")
                                 key_field = key_field.replace(")", "")
                                 key_field = re.sub('\s+', '', key_field)
