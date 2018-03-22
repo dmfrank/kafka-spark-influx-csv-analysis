@@ -176,10 +176,7 @@ class AggregationsParser:
                                 key_field = re.sub('\s+', '', key_field)
                                 list_key_field = key_field.split(",")
                                 for field in list_key_field:
-                                    expression = {}
-                                    expression["func_name"] = ""
-                                    expression["input_field"] = field
-                                    expression["key"] = True
+                                    expression = {"func_name": "", "input_field": field, "key": True}
                                     list_expression.append(expression)
                             else:
                                 raise NotValidAggregationExpression(
