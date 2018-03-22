@@ -38,11 +38,7 @@ class TransformationsValidatorTestCase(unittest.TestCase):
                      data_structure_sorted)))
 
     def test_validate_work_success(self):
-        validator = TransformationsValidator(TransformationOperations({
-            "country": "./GeoLite2-Country.mmdb",
-            "city": "./GeoLite2-City.mmdb",
-            "asn": "./GeoLite2-ASN.mmdb"
-        }), self.data_structure_pyspark)
+        validator = TransformationsValidator(TransformationOperations(), self.data_structure_pyspark)
         fields = validator.validate(["src_ip", "dst_ip", "packet_size", "sampling_rate"])
         self.assertEqual(fields, types.StructType([
             types.StructField('src_ip', types.StringType()),
@@ -52,21 +48,13 @@ class TransformationsValidatorTestCase(unittest.TestCase):
         ]), 'StructType should be equal')
 
     def test_validate_raise_field_not_exists_error(self):
-        validator = TransformationsValidator(TransformationOperations({
-            "country": "./GeoLite2-Country.mmdb",
-            "city": "./GeoLite2-City.mmdb",
-            "asn": "./GeoLite2-ASN.mmdb"
-        }), self.data_structure_pyspark)
+        validator = TransformationsValidator(TransformationOperations(), self.data_structure_pyspark)
 
         with self.assertRaises(errors.FieldNotExists):
             validator.validate(["src_ip", "dst_ip", "packet_size", "sample_rate"])
 
     def test_validate_rename_field(self):
-        validator = TransformationsValidator(TransformationOperations({
-            "country": "./GeoLite2-Country.mmdb",
-            "city": "./GeoLite2-City.mmdb",
-            "asn": "./GeoLite2-ASN.mmdb"
-        }), self.data_structure_pyspark)
+        validator = TransformationsValidator(TransformationOperations(), self.data_structure_pyspark)
 
         fields = validator.validate([FieldTransformation("size", "packet_size"), "dst_ip"])
 
@@ -76,21 +64,13 @@ class TransformationsValidatorTestCase(unittest.TestCase):
         ]))
 
     def test_validate_raise_field_not_exists_when_rename_field(self):
-        validator = TransformationsValidator(TransformationOperations({
-            "country": "./GeoLite2-Country.mmdb",
-            "city": "./GeoLite2-City.mmdb",
-            "asn": "./GeoLite2-ASN.mmdb"
-        }), self.data_structure_pyspark)
+        validator = TransformationsValidator(TransformationOperations(), self.data_structure_pyspark)
 
         with self.assertRaises(errors.FieldNotExists):
             validator.validate([FieldTransformation("size", "not_exists_field"), "dst_ip"])
 
     def test_validate_raise_operation_not_supported_error(self):
-        validator = TransformationsValidator(TransformationOperations({
-            "country": "./GeoLite2-Country.mmdb",
-            "city": "./GeoLite2-City.mmdb",
-            "asn": "./GeoLite2-ASN.mmdb"
-        }), self.data_structure_pyspark)
+        validator = TransformationsValidator(TransformationOperations(), self.data_structure_pyspark)
 
         syntaxtree = SyntaxTree()
         syntaxtree.operation = "not_exists_operation"
@@ -99,42 +79,30 @@ class TransformationsValidatorTestCase(unittest.TestCase):
             validator.validate([FieldTransformation("size", syntaxtree), "dst_ip"])
 
     def test_validate_raise_incorrect_arguments_amount_for_operation_error(self):
-        validator = TransformationsValidator(TransformationOperations({
-            "country": "./GeoLite2-Country.mmdb",
-            "city": "./GeoLite2-City.mmdb",
-            "asn": "./GeoLite2-ASN.mmdb"
-        }), self.data_structure_pyspark)
+        validator = TransformationsValidator(TransformationOperations(), self.data_structure_pyspark)
 
         syntaxtree = SyntaxTree()
-        syntaxtree.operation = "sum"
+        syntaxtree.operation = "add"
         syntaxtree.children = ["1", "2", "3"]
 
         with self.assertRaises(errors.IncorrectArgumentsAmountForOperationError):
-            validator.validate([FieldTransformation("sum", syntaxtree), "dst_ip"])
+            validator.validate([FieldTransformation("add", syntaxtree), "dst_ip"])
 
     def test_validate_raise_incorrect_argument_type_for_operation_error(self):
-        validator = TransformationsValidator(TransformationOperations({
-            "country": "./GeoLite2-Country.mmdb",
-            "city": "./GeoLite2-City.mmdb",
-            "asn": "./GeoLite2-ASN.mmdb"
-        }), self.data_structure_pyspark)
+        validator = TransformationsValidator(TransformationOperations(), self.data_structure_pyspark)
 
         syntaxtree = SyntaxTree()
-        syntaxtree.operation = "mult"
+        syntaxtree.operation = "mul"
         syntaxtree.children = ["src_ip", "packet_size"]
 
         with self.assertRaises(errors.IncorrectArgumentTypeForOperationError):
             validator.validate([FieldTransformation("traffic", syntaxtree), "dst_ip"])
 
     def test_validate_with_correct_one_level_subtree(self):
-        validator = TransformationsValidator(TransformationOperations({
-            "country": "./GeoLite2-Country.mmdb",
-            "city": "./GeoLite2-City.mmdb",
-            "asn": "./GeoLite2-ASN.mmdb"
-        }), self.data_structure_pyspark)
+        validator = TransformationsValidator(TransformationOperations(), self.data_structure_pyspark)
 
         syntaxtree = SyntaxTree()
-        syntaxtree.operation = "mult"
+        syntaxtree.operation = "mul"
         syntaxtree.children = ["packet_size", "sampling_rate"]
 
         fields = validator.validate([FieldTransformation("traffic", syntaxtree), "dst_ip"])
@@ -145,18 +113,14 @@ class TransformationsValidatorTestCase(unittest.TestCase):
         ]))
 
     def test_validate_with_correct_two_level_subtree(self):
-        validator = TransformationsValidator(TransformationOperations({
-            "country": "./GeoLite2-Country.mmdb",
-            "city": "./GeoLite2-City.mmdb",
-            "asn": "./GeoLite2-ASN.mmdb"
-        }), self.data_structure_pyspark)
+        validator = TransformationsValidator(TransformationOperations(), self.data_structure_pyspark)
 
         syntaxtree = SyntaxTree()
-        syntaxtree.operation = "sum"
+        syntaxtree.operation = "add"
         syntaxtree.children = ["sampling_rate", "packet_size"]
 
         main_syntax_tree = SyntaxTree()
-        main_syntax_tree.operation = "mult"
+        main_syntax_tree.operation = "mul"
         main_syntax_tree.children = [syntaxtree, "sampling_rate"]
 
         fields = validator.validate([FieldTransformation("result", main_syntax_tree), "dst_ip"])
@@ -167,46 +131,34 @@ class TransformationsValidatorTestCase(unittest.TestCase):
         ]))
 
     def test_validate_raise_operation_not_supported_error_for_subtree(self):
-        validator = TransformationsValidator(TransformationOperations({
-            "country": "./GeoLite2-Country.mmdb",
-            "city": "./GeoLite2-City.mmdb",
-            "asn": "./GeoLite2-ASN.mmdb"
-        }), self.data_structure_pyspark)
+        validator = TransformationsValidator(TransformationOperations(), self.data_structure_pyspark)
 
         syntaxtree = SyntaxTree()
         syntaxtree.operation = "not_exists_operator"
         syntaxtree.children = ["1", "2"]
 
         main_syntax_tree = SyntaxTree()
-        main_syntax_tree.operation = "mult"
+        main_syntax_tree.operation = "mul"
         main_syntax_tree.children = [syntaxtree, "1"]
 
         with self.assertRaises(errors.OperationNotSupportedError):
             validator.validate([FieldTransformation("result", main_syntax_tree), "dst_ip"])
 
     def test_validate_function_with_different_arguments_type(self):
-        validator = TransformationsValidator(TransformationOperations({
-            "country": "./GeoLite2-Country.mmdb",
-            "city": "./GeoLite2-City.mmdb",
-            "asn": "./GeoLite2-ASN.mmdb"
-        }), self.data_structure_pyspark)
+        validator = TransformationsValidator(TransformationOperations(), self.data_structure_pyspark)
 
-        main_syntax_tree = SyntaxTree()
-        main_syntax_tree.operation = "truncate"
-        main_syntax_tree.children = ["src_ip", "5"]
+        tree = SyntaxTree()
+        tree.operation = "truncate"
+        tree.children = ["src_ip", "5"]
 
-        fields = validator.validate([FieldTransformation("result", main_syntax_tree)])
+        fields = validator.validate([FieldTransformation("result", tree)])
 
         self.assertEqual(fields, types.StructType([
             types.StructField("result", types.StringType())
         ]))
 
     def test_validate_raise_error_for_function_with_different_arguments_type(self):
-        validator = TransformationsValidator(TransformationOperations({
-            "country": "./GeoLite2-Country.mmdb",
-            "city": "./GeoLite2-City.mmdb",
-            "asn": "./GeoLite2-ASN.mmdb"
-        }), self.data_structure_pyspark)
+        validator = TransformationsValidator(TransformationOperations(), self.data_structure_pyspark)
 
         main_syntax_tree = SyntaxTree()
         main_syntax_tree.operation = "truncate"

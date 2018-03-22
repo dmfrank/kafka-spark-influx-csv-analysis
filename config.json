@@ -15,7 +15,7 @@
     }
   },
   "processing": {
-    "transformation": "packet_size;traffic: mult(packet_size,sampling_rate)",
+    "transformation": "packet_size;traffic: mul(packet_size,sampling_rate)",
     "aggregations": {
       "operation_type": "reduce",
       "rule": " Max(packet_size), Max(traffic)"

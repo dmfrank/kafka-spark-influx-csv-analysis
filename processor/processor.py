@@ -18,11 +18,11 @@ from .aggregation_processor import AggregationProcessor
 
 class Processor:
     def __init__(self, config):
-        transformation_processor = TransformationProcessor(config)
-        self.transformation = transformation_processor.transformation
+        self.transformation_processor = TransformationProcessor(config)
+        self.transformation = self.transformation_processor.transformation
 
-        self.transformation_processor_fields = transformation_processor.fields
-        aggregation_processor = AggregationProcessor(config, transformation_processor.fields)
+        self.transformation_processor_fields = self.transformation_processor.fields
+        aggregation_processor = AggregationProcessor(config, self.transformation_processor.fields)
 
         self.aggregation_output_struct = aggregation_processor.get_output_structure()
 

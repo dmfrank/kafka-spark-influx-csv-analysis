@@ -21,7 +21,7 @@
       "source_ip: src_ip",
       "dst_ip",
       "src_country: country_of(src_ip)",
-      "traffic: mult(packet_size,sampling_rate)"
+      "traffic: mul(packet_size, sampling_rate)"
     ],
     "aggregations": {
       "operation_type": "reduce",

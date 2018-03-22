@@ -28,7 +28,7 @@
     "transformation": [
       "src_country: country(src_ip)",
       "packet_size",
-      "traffic: mult(packet_size,sampling_rate)"
+      "traffic: mul(packet_size,sampling_rate)"
     ],
     "aggregations": {
       "operation_type": "reduceByKey",

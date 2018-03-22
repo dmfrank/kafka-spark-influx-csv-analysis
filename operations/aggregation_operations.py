@@ -23,7 +23,7 @@ class SupportedReduceOperations:
                 "input_type": LongType(),
                 "output_type": LongType()
             },
-            "Mult": {
+            "Mul": {
                 "ref_to_func": lambda x, y: x * y,
                 "input_type": LongType(),
                 "output_type": LongType()

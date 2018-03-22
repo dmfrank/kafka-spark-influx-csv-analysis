@@ -89,7 +89,7 @@ To run the application, you will need a configuration file. It is a json file wi
         }
     },
     "processing": {
-        "transformation": "src_country: country(src_ip);packet_size;traffic: mult(packet_size,sampling_rate)",
+        "transformation": "src_country: country(src_ip);packet_size;traffic: mul(packet_size,sampling_rate)",
         "aggregations": {
             "operation_type": "reduceByKey",
             "rule": "key = src_country; Max(packet_size); Sum(traffic)"
@@ -188,9 +188,9 @@ This section specifies transformations and aggregations to be performed on the i
 
 * "transformation" - this string specifies transformation steps for every string received from the input source.
 
-   User can rename the field (new_name: old_name), apply one of 7 functions: sum, div, mult, minus, country, city, aarea (src_country: country(src_ip)) or just use the field unchanged. 
+   User can rename the field (new_name: old_name), apply one of 7 functions: sum, div, mul, minus, country, city, aarea (src_country: country(src_ip)) or just use the field unchanged.
 
-   Nested operations (sum(mult(packet_size, sampling_rate), 1000)) are not supported at the moment. 
+   Nested operations (sum(mul(packet_size, sampling_rate), 1000)) are not supported at the moment.
 
    Each field declared in the transformation section should be subsequently used in aggregation, otherwise the application will raise exception.
    
@@ -200,7 +200,7 @@ This section specifies transformations and aggregations to be performed on the i
   
   The key can contain more than one field (key = (src_ip, dst_country, src_port_or_icmp_type)).
   
-  User can specify one of the 4 aggregation functions: Sum, Mult, Max, Min (Max(packet_size)).
+  User can specify one of the 4 aggregation functions: Sum, Mul, Max, Min (Max(packet_size)).
 
 ### Section databases
 This section specifies paths to databases which are necessary for the geo functions (country(), city(), aarea()) to work.

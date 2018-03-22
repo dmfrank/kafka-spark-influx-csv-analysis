@@ -12,14 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pyspark.sql.types as types
+from pyspark.sql.types import *
+import inspect
+
+from errors import errors
 
 
-class Operation:
+class Operation(object):
     def __init__(self, name, op_count, func):
         self.name = name
         self.op_count = op_count
         self.func = func
+
+    def __str__(self):
+        return "{}({}) => {}".format(self.name,
+                                     ",".join(map(lambda x: "arg{}".format(x), range(self.op_count))),
+                                     inspect.getsource(self.func))
 
     def result_type(self, arg_types = []):
         raise NotImplemented("Should be implemented in concrete operation.")
@@ -28,19 +36,22 @@ class Operation:
     def get_larger_type(t=[]):
 
         avail_types = [
-            types.BooleanType,
-            types.ByteType,
-            types.ShortType,
-            types.IntegerType,
-            types.LongType,
-            types.FloatType,
-            types.DoubleType
+            BooleanType(),
+            ByteType(),
+            ShortType(),
+            IntegerType(),
+            LongType(),
+            FloatType(),
+            DoubleType()
         ]
 
-        if len(t) < 2:
-            raise IndexError("Should be at least 2 arguments.")
+        if len(t) < 1:
+            raise IndexError("Should be at least 1 argument.")
 
-        indexes = map(lambda x: avail_types.index(x), t)
+        try:
+            indexes = list(map(lambda x: avail_types.index(x), t))
+        except ValueError as e:
+            raise errors.IncorrectArgumentTypeForOperationError(e)
         rt = avail_types[max(indexes)]
         return rt
 
@@ -60,7 +71,7 @@ class Id(UnarySameTypeOperation):
 
 class GreatTypeCastedOperation(Operation):
     def __init__(self, name, op_count, func):
-        super().__init__(self, name, op_count, func)
+        super().__init__(name, op_count, func)
 
     def result_type(self, arg_types):
         return self.get_larger_type(arg_types)
@@ -68,49 +79,41 @@ class GreatTypeCastedOperation(Operation):
 
 class MathDiv(Operation):
     def __init__(self):
-        super().__init__(self, "mathdiv", 2, lambda x, y: x / float(y))
+        super().__init__("mathdiv", 2, lambda x, y: x / float(y))
 
     def result_type(self, arg_types = []):
-        return types.DoubleType
+        return DoubleType()
 
 
 class Boolean(Operation):
     def result_type(self, arg_types = []):
-        return types.BooleanType
-
-
-class Eq(Boolean):
-    def __init__(self):
-        super().__init__(self,"eq", 2, lambda x,y: x == y)
-
-
-class Gt(Boolean):
-    def __init__(self):
-        super().__init__(self,"gt", 2, lambda x,y: x > y)
-
-
-class Ge(Boolean):
-    def __init__(self):
-        super().__init__(self,"ge", 2, lambda x,y: x >= y)
-
-
-class Lt(Boolean):
-    def __init__(self):
-        super().__init__(self,"lt", 2, lambda x,y: x < y)
-
-
-class Le(Boolean):
-    def __init__(self):
-        super().__init__(self,"le", 2, lambda x,y: x <= y)
+        return BooleanType()
 
 
 class Cast(Operation):
     def __init__(self,name, new_type, function):
-        super().__init__(self, name, 1, function)
+        super().__init__(name, 1, function)
         self.ret_type = new_type
 
     def result_type(self, arg_types = []):
         return self.ret_type
+
+
+class Truncate(Operation):
+    def __init__(self):
+        super().__init__("truncate", 2, lambda x, length: x[:length] )
+
+    def result_type(self, arg_types = []):
+        if len(arg_types) != 2:
+            raise ValueError("Truncate expects 2 arguments. Got '{}'".format(len(arg_types)))
+
+        if arg_types[0] != StringType():
+            raise errors.IncorrectArgumentTypeForOperationError("First argument of Truncate should be a string. Got {}".format(arg_types[0]))
+
+        if not (arg_types[1] == IntegerType() or arg_types[1] == LongType()):
+            raise errors.IncorrectArgumentTypeForOperationError("Second argument should be a long or int. Got {}".format(arg_types[1]))
+
+        return StringType()
 
 
 class TransformationOperations:
@@ -120,20 +123,28 @@ class TransformationOperations:
     def __init__(self):
         self.operations_dict = {}
         self.add(Id())
-        self.add(GreatTypeCastedOperation("add", lambda x, y: x + y))
-        self.add(GreatTypeCastedOperation("sub", lambda x, y: x - y))
-        self.add(GreatTypeCastedOperation("mul", lambda x, y: x * y))
-        self.add(GreatTypeCastedOperation("odd", lambda x, y: x % y))
-        self.add(GreatTypeCastedOperation("pydiv", lambda x, y: x / y))
+
+        self.add(GreatTypeCastedOperation("add", 2, lambda x, y: x + y))
+        self.add(GreatTypeCastedOperation("sub", 2, lambda x, y: x - y))
+        self.add(GreatTypeCastedOperation("mul", 2, lambda x, y: x * y))
+        self.add(GreatTypeCastedOperation("odd", 2, lambda x, y: x % y))
+        self.add(GreatTypeCastedOperation("pydiv", 2, lambda x, y: x / y))
         self.add(MathDiv())
-        self.add(Eq())
-        self.add(Gt())
-        self.add(Ge())
-        self.add(Lt())
-        self.add(Le())
-        self.add(Cast("long",types.LongType, lambda x: int(x)))
-        self.add(Cast("int", types.IntegerType, lambda x: int(x)))
-        self.add(Cast("float", types.FloatType, lambda x: float(x)))
-        self.add(Cast("double", types.DoubleType, lambda x: float(x)))
-        self.add(Cast("boolean", types.BooleanType, lambda x: bool(x)))
-        self.add(Cast("not", types.BooleanType, lambda x: not x))
+
+        self.add(Boolean("lt", 2, lambda x,y: x < y))
+        self.add(Boolean("le", 2, lambda x,y: x <= y))
+        self.add(Boolean("gt", 2, lambda x,y: x > y))
+        self.add(Boolean("ge", 2, lambda x,y: x >= y))
+        self.add(Boolean("eq", 2, lambda x,y: x == y))
+        self.add(Boolean("neq", 2, lambda x,y: x != y))
+        self.add(Boolean("or", 2, lambda x,y: x or y))
+        self.add(Boolean("and", 2, lambda x,y: x and y))
+
+        self.add(Cast("long",LongType(), lambda x: int(x)))
+        self.add(Cast("int", IntegerType(), lambda x: int(x)))
+        self.add(Cast("float", FloatType(), lambda x: float(x)))
+        self.add(Cast("double", DoubleType(), lambda x: float(x)))
+        self.add(Cast("boolean", BooleanType(), lambda x: bool(x)))
+        self.add(Cast("not", BooleanType(), lambda x: not x))
+
+        self.add(Truncate())

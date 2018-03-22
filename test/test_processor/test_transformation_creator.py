@@ -42,17 +42,13 @@ class TransformationCreatorTestCase(TestCase):
 
     def test_build_lambda(self):
         mult_syntax_tree = SyntaxTree()
-        mult_syntax_tree.operation = "mult"
+        mult_syntax_tree.operation = "mul"
         mult_syntax_tree.children = ["packet_size", "sampling_rate"]
 
         parsed_transformations = ["src_ip", FieldTransformation("destination_ip", "dst_ip"),
                                   FieldTransformation("traffic", mult_syntax_tree)]
 
-        creator = TransformationCreator(self.data_structure, parsed_transformations, TransformationOperations({
-            "country": "./GeoLite2-Country.mmdb",
-            "city": "./GeoLite2-City.mmdb",
-            "asn": "./GeoLite2-ASN.mmdb"
-        }))
+        creator = TransformationCreator(self.data_structure, parsed_transformations, TransformationOperations())
 
         transformation = creator.build_lambda()
 
@@ -75,21 +71,18 @@ class TransformationCreatorTestCase(TestCase):
 
     def test_build_lambda_with_nested_operations(self):
         mult_syntax_tree = SyntaxTree()
-        mult_syntax_tree.operation = "mult"
+        mult_syntax_tree.operation = "mul"
         mult_syntax_tree.children = ["packet_size", "sampling_rate"]
 
         root_mult_st = SyntaxTree()
-        root_mult_st.operation = "mult"
+        root_mult_st.operation = "mul"
         root_mult_st.children = [mult_syntax_tree, "10"]
 
         parsed_transformations = ["src_ip", FieldTransformation("destination_ip", "dst_ip"),
                                   FieldTransformation("traffic", root_mult_st)]
 
-        creator = TransformationCreator(self.data_structure, parsed_transformations, TransformationOperations({
-            "country": "./GeoLite2-Country.mmdb",
-            "city": "./GeoLite2-City.mmdb",
-            "asn": "./GeoLite2-ASN.mmdb"
-        }))
+        creator = TransformationCreator(self.data_structure, parsed_transformations,
+                                        TransformationOperations())
 
         transformation = creator.build_lambda()
 
