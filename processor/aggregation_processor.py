@@ -22,7 +22,7 @@ class AggregationProcessor:
         self.config_processor = config_processor
         self._input_data_structure = input_data_structure
 
-        self._support_reduce_operations = SupportedReduceOperations().operation
+        self.operations = SupportedReduceOperations().operation
         self.key_data = []
 
         aggregation_expression = AggregationsParser(config_processor, self._input_data_structure)
@@ -74,8 +74,8 @@ class AggregationProcessor:
         return lambda rdd: rdd.reduceByKey(aggregation)
 
     def build_aggregation_lambda(self):
-        ordered_pointers_to_function = [self._support_reduce_operations[self._field_to_func_name[exp_tr]]
-                                        ["ref_to_func"] for exp_tr in self._input_field_name]
+        ordered_pointers_to_function = [
+            self.operations[self._field_to_func_name[exp_tr]].function for exp_tr in self._input_field_name]
 
         # ranked pointers contains pairs (field_number , function)
         ranked_pointer = list(enumerate(ordered_pointers_to_function))

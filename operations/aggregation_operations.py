@@ -12,43 +12,47 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pyspark.sql.types import LongType, DoubleType, FloatType, IntegerType, ShortType, ByteType
+from pyspark.sql.types import *
+
+
+class ReduceOperation:
+    def __init__(self, name, function, supported_arg_types=[]):
+        self.name = name
+        self.function = function
+        self.supported_arg_types = supported_arg_types
+
+    def output_type(self, input_type):
+        return input_type
+
+    @classmethod
+    def std_scalar_math_types(cls):
+        return [BooleanType(),
+                ByteType(),
+                ShortType(),
+                IntegerType(),
+                LongType(),
+                FloatType(),
+                DoubleType()]
+
+    def is_type_compatible(self, input_type):
+        try:
+            self.supported_arg_types.index(input_type)
+            return True
+        except ValueError:
+            return False
 
 
 class SupportedReduceOperations:
+    def add(self, operation):
+        self.operation[operation.name] = operation
+
+    def is_type_compatible(self, input_type, function_name):
+        return self.operation[function_name].is_type_compatible(input_type)
+
     def __init__(self):
-        self.operation = {
-            "Sum": {
-                "ref_to_func": lambda x, y: x + y,
-                "input_type": LongType(),
-                "output_type": LongType()
-            },
-            "Mul": {
-                "ref_to_func": lambda x, y: x * y,
-                "input_type": LongType(),
-                "output_type": LongType()
-            },
-            "Min": {
-                "ref_to_func": lambda x, y: x if x < y else y,
-                "input_type": LongType(),
-                "output_type": LongType()
-            },
-            "Max": {
-                "ref_to_func": lambda x, y: x if x > y else y,
-                "input_type": LongType(),
-                "output_type": LongType()
-            }
-        }
+        self.operation = {}
 
-        self._type_transform_rule = {DoubleType(): 5, FloatType(): 4, LongType(): 3, IntegerType(): 2,
-                                     ShortType(): 1, ByteType(): 0}
-        self.numeric_types = self._type_transform_rule.keys()
-
-    def check_type_arg_function(self, type_input_arg, function_name):
-        if (self._type_transform_rule[self.operation[function_name]["input_type"]] >= self._type_transform_rule[
-            type_input_arg]) \
-                and (self._type_transform_rule[type_input_arg] >= self._type_transform_rule[
-                    self.operation[function_name]["output_type"]]):
-            return True
-        else:
-            return False
+        self.add(ReduceOperation("sum", lambda x, y: x + y, ReduceOperation.std_scalar_math_types()))
+        self.add(ReduceOperation("mul", lambda x, y: x * y, ReduceOperation.std_scalar_math_types()))
+        self.add(ReduceOperation("max", lambda x, y: y if x < y else x, ReduceOperation.std_scalar_math_types()))
+        self.add(ReduceOperation("min", lambda x, y: y if x > y else x, ReduceOperation.std_scalar_math_types()))

@@ -38,7 +38,7 @@ class TestConfig():
 
 class TestAggregationProcessor(TestCase):
     def test_build_lambda_for_reduce(self):
-        test_input_rule = json.loads("""["Min(packet_size)","Max(sampling_rate)","Sum(traffic)"]""")
+        test_input_rule = json.loads("""["min(packet_size)","max(sampling_rate)","sum(traffic)"]""")
         input_data_structure = StructType([StructField("sampling_rate", LongType()),
                                            StructField("packet_size", LongType()),
                                            StructField("traffic", LongType())])

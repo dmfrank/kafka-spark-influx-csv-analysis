@@ -18,7 +18,7 @@ import inspect
 from errors import errors
 
 
-class Operation(object):
+class MapOperation(object):
     def __init__(self, name, op_count, func):
         self.name = name
         self.op_count = op_count
@@ -56,7 +56,7 @@ class Operation(object):
         return rt
 
 
-class UnarySameTypeOperation(Operation):
+class UnarySameTypeOperation(MapOperation):
     def __init__(self, name, func):
         super().__init__(name, 1, func)
 
@@ -69,7 +69,7 @@ class Id(UnarySameTypeOperation):
         super().__init__("id", lambda x: x)
 
 
-class GreatTypeCastedOperation(Operation):
+class GreatTypeCastedOperation(MapOperation):
     def __init__(self, name, op_count, func):
         super().__init__(name, op_count, func)
 
@@ -77,7 +77,7 @@ class GreatTypeCastedOperation(Operation):
         return self.get_larger_type(arg_types)
 
 
-class MathDiv(Operation):
+class MathDiv(MapOperation):
     def __init__(self):
         super().__init__("mathdiv", 2, lambda x, y: x / float(y))
 
@@ -85,12 +85,12 @@ class MathDiv(Operation):
         return DoubleType()
 
 
-class Boolean(Operation):
+class Boolean(MapOperation):
     def result_type(self, arg_types = []):
         return BooleanType()
 
 
-class Cast(Operation):
+class Cast(MapOperation):
     def __init__(self,name, new_type, function):
         super().__init__(name, 1, function)
         self.ret_type = new_type
@@ -99,7 +99,7 @@ class Cast(Operation):
         return self.ret_type
 
 
-class Truncate(Operation):
+class Truncate(MapOperation):
     def __init__(self):
         super().__init__("truncate", 2, lambda x, length: x[:length] )
 

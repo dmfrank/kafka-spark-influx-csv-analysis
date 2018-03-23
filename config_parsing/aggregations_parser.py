@@ -16,6 +16,7 @@ import re
 from errors.errors import NotValidAggregationExpression
 from operations.aggregation_operations import SupportedReduceOperations
 
+
 class AggregationsParser:
     def __init__(self, config, input_data_structure):
         self._config = config.content["processing"]["aggregations"]
@@ -57,18 +58,11 @@ class AggregationsParser:
                     raise NotValidAggregationExpression("Aggregate already aggregated field {}".format(
                         field["input_field"]))
 
-                if dict_input_field_type[field['input_field']] in reduce_operation.numeric_types:
-                    if not reduce_operation.check_type_arg_function(dict_input_field_type[field['input_field']],
-                                                                    field['func_name']):
-                        raise NotValidAggregationExpression(
-                            "Incorrect type of field {} for function {}".format(field['input_field'],
-                                                                                field['func_name']))
-                else:
-                    if dict_input_field_type[field['input_field']] != \
-                            reduce_operation.operation[field['func_name']]['input_type']:
-                        raise NotValidAggregationExpression(
-                            "Incorrect type of field {} for function {}".format(field['input_field'],
-                                                                                field['func_name']))
+                if not reduce_operation.is_type_compatible(dict_input_field_type[field['input_field']],
+                                                           field['func_name']):
+                    raise NotValidAggregationExpression(
+                        "Incorrect type of field {} for function {}".format(field['input_field'],
+                                                                            field['func_name']))
 
     def get_parse_expression(self):
         """
