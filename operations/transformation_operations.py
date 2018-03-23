@@ -147,4 +147,5 @@ class TransformationOperations:
         self.add(Cast("boolean", BooleanType(), lambda x: bool(x)))
         self.add(Cast("not", BooleanType(), lambda x: not x))
 
+        self.add(Cast("one", IntegerType(), lambda x: 1))
         self.add(Truncate())
