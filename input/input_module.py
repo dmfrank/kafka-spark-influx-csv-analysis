@@ -24,20 +24,26 @@ from pyspark.streaming.kafka import KafkaUtils
 string_to_int = lambda x: int(x)
 string_to_string = lambda x: x
 string_to_float = lambda x: float(x)
-
+string_to_boolean = lambda x: bool(x)
 
 def type_to_func(type_field):
     if type_field == IntegerType():
         return string_to_int
+
+    if type_field == BooleanType():
+        return string_to_boolean
+
     if type_field == LongType():
         return string_to_int
+
     if type_field == StringType():
         return string_to_string
+
     if type_field == DoubleType():
         return string_to_float
+
     if type_field == FloatType():
         return string_to_float
-
 
 
 class InputConfig:
@@ -95,9 +101,8 @@ class KafkaStreaming(object):
         self._spark = SparkSession.builder.appName("StreamingDataKafka").getOrCreate()
         sc = self._spark.sparkContext
 
-        sc.addFile(config.content["databases"]["country"])
-        sc.addFile(config.content["databases"]["city"])
-        sc.addFile(config.content["databases"]["asn"])
+        for name, file in config.content["databases"].items():
+            sc.addFile(file)
 
         self._ssc = StreamingContext(sc, self._batchDuration)
 

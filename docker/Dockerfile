@@ -35,4 +35,7 @@ cd spark-2.1.0-bin-hadoop2.7/python/ && \\
 python setup.py install && \\
 apt-get clean
 
+COPY requirements.txt /requirements.txt
+RUN python -m pip install -r /requirements.txt
+
 CMD /bin/bash

@@ -16,10 +16,12 @@ from errors import errors
 import json
 import re
 
+
 class FieldTransformation:
     def __init__(self, field_name, operation):
         self.field_name = field_name  # new field name
         self.operation = operation  # SyntaxTree or string
+
 
 class SyntaxTree:
     def __init__(self):
@@ -36,6 +38,7 @@ class SyntaxTree:
                 ch.show(shift + 1)
             else:
                 print(" " * (shift + 1) * 2 + "Leaf node: ", ch)
+
 
 class TransformationsParser:
     def __init__(self, transformations):
@@ -94,7 +97,7 @@ class TransformationsParser:
             return args
 
     def run(self):
-        tokenized_transformation = list(map(lambda field: field.strip(), self.transformations.split(";")))
+        tokenized_transformation = list(map(lambda field: field.strip(), self.transformations))
         for token in tokenized_transformation:
             if ":" not in token:  # if it's field
                 self.expanded_transformation.append(token.strip())

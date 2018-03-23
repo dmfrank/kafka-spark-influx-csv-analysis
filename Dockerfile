@@ -15,10 +15,9 @@
 FROM bw-sw-spark
 ENV LANG=en_US.UTF-8
 
-ADD . /sflow-analysis
+ADD . /processor
 
-WORKDIR /sflow-analysis
-RUN ["pip3", "install", "-r", "requirements.txt"]
+WORKDIR /processor
 
 COPY ./docker-entrypoint.sh /
 COPY ./log4j.properties /usr/lib/spark/conf/

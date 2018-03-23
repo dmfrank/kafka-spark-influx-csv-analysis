@@ -16,12 +16,13 @@ import re
 from errors.errors import NotValidAggregationExpression
 from operations.aggregation_operations import SupportedReduceOperations
 
+
 class AggregationsParser:
     def __init__(self, config, input_data_structure):
         self._config = config.content["processing"]["aggregations"]
         self._input_rule = config.content["processing"]["aggregations"]["rule"]
-        self._regexp_reducefield = '\s*(\w+)\((\s*\w+\s*)\)\s*'
-        self._regexp_keyfield = '\s*(key)\s*\=(\s*\(*[\w\\,\s]*\s*\)*)\s*'
+        self._regexp_reduce_expr = '\s*(\w+)\((\s*\w+\s*)\)\s*'
+        self._regexp_key_expr = '\s*(key)\s*\:(\s*\(*[\w\\,\s]*\s*\)*)\s*'
         self._input_data_structure = input_data_structure
         self._expression = []
 
@@ -57,18 +58,11 @@ class AggregationsParser:
                     raise NotValidAggregationExpression("Aggregate already aggregated field {}".format(
                         field["input_field"]))
 
-                if dict_input_field_type[field['input_field']] in reduce_operation.numeric_types:
-                    if not reduce_operation.check_type_arg_function(dict_input_field_type[field['input_field']],
-                                                                    field['func_name']):
-                        raise NotValidAggregationExpression(
-                            "Incorrect type of field {} for function {}".format(field['input_field'],
-                                                                                field['func_name']))
-                else:
-                    if dict_input_field_type[field['input_field']] != \
-                            reduce_operation.operation[field['func_name']]['input_type']:
-                        raise NotValidAggregationExpression(
-                            "Incorrect type of field {} for function {}".format(field['input_field'],
-                                                                                field['func_name']))
+                if not reduce_operation.is_type_compatible(dict_input_field_type[field['input_field']],
+                                                           field['func_name']):
+                    raise NotValidAggregationExpression(
+                        "Incorrect type of field {} for function {}".format(field['input_field'],
+                                                                            field['func_name']))
 
     def get_parse_expression(self):
         """
@@ -112,23 +106,23 @@ class AggregationsParser:
         :return: return list of dictionaries. Every dictionary include next field: function = field with function,
             input_field = input field name from source data.
         """
-        separate_fields = self._input_rule.split(";")
+        separate_fields = self._input_rule
 
         output_list = []
         for field in separate_fields:
             if self._check_field_on_valid_characters(field):
-                residue_field = re.sub(self._regexp_reducefield, '', field)
-                residue_field = re.sub(self._regexp_keyfield, '', residue_field)
+                residue_field = re.sub(self._regexp_reduce_expr, '', field)
+                residue_field = re.sub(self._regexp_key_expr, '', residue_field)
                 residue_field = re.sub('\s+', '', residue_field)
                 if len(residue_field) == 0:
-                    re_match_list = re.findall(self._regexp_reducefield, field)
+                    re_match_list = re.findall(self._regexp_reduce_expr, field)
                     output_list.append(self._field_validation(re_match_list, field))
                 else:
                     raise NotValidAggregationExpression(
                         "Error: Error in the rule '%s'. Perhaps a semicolon is missing." %
                         self._input_rule)
             else:
-                raise NotValidAggregationExpression("Error: Error in the field '%s'. Find not valid characters" %
+                raise NotValidAggregationExpression("Error: Error in the field '%s'. Invalid characters detected." %
                                                     field)
         return output_list
 
@@ -146,7 +140,7 @@ class AggregationsParser:
         :param field: input field
         :return: true if field contain valid character and false at other case
         """
-        return not len(re.sub('[a-zA-Z0-9\(\)\_\s\=\,]', '', field)) > 0
+        return not len(re.sub('[a-zA-Z0-9\(\)\_\s\:\,]', '', field)) > 0
 
     def _parse_reduce_by_key(self):
         """
@@ -154,15 +148,15 @@ class AggregationsParser:
         :return: return list of dictionaries. Every dictionary include next field: function = field with function,
             input_field = input field name from source data.
         """
-        separate_fields = self._input_rule.split(";")
+        separate_fields = self._input_rule
 
         output_list = []
         for field in separate_fields:
             if self._check_field_on_valid_characters(field):
-                re_match_list = re.findall(self._regexp_reducefield, field)
-                re_match_key_field = re.findall(self._regexp_keyfield, field)
-                residue_field = re.sub(self._regexp_reducefield, '', field)
-                residue_field = re.sub(self._regexp_keyfield, '', residue_field)
+                re_match_list = re.findall(self._regexp_reduce_expr, field)
+                re_match_key_field = re.findall(self._regexp_key_expr, field)
+                residue_field = re.sub(self._regexp_reduce_expr, '', field)
+                residue_field = re.sub(self._regexp_key_expr, '', residue_field)
                 residue_field = re.sub('\s+', '', residue_field)
                 if len(residue_field) == 0:
                     if re_match_key_field and not re_match_list and len(re_match_key_field):
@@ -170,16 +164,13 @@ class AggregationsParser:
                         list_expression = []
                         key_field = re_match_key_field[0][1]
                         if self._check_unique_key_field(output_list):
-                            if (key_field.count("(") == key_field.count(")")):
+                            if key_field.count("(") == key_field.count(")"):
                                 key_field = key_field.replace("(", "")
                                 key_field = key_field.replace(")", "")
                                 key_field = re.sub('\s+', '', key_field)
                                 list_key_field = key_field.split(",")
                                 for field in list_key_field:
-                                    expression = {}
-                                    expression["func_name"] = ""
-                                    expression["input_field"] = field
-                                    expression["key"] = True
+                                    expression = {"func_name": "", "input_field": field, "key": True}
                                     list_expression.append(expression)
                             else:
                                 raise NotValidAggregationExpression(
@@ -190,7 +181,7 @@ class AggregationsParser:
                             else:
                                 output_list = list_expression
                         else:
-                            raise NotValidAggregationExpression("Error: Not uniqueness key field in rule '%s'." %
+                            raise NotValidAggregationExpression("Key field is not unique in rule '%s'." %
                                                                 self._input_rule)
                     elif not re_match_key_field and re_match_list:
                         expression = self._field_validation(re_match_list, field)
@@ -204,7 +195,7 @@ class AggregationsParser:
                         "Error: Error in the rule '%s'. Perhaps a semicolon is missing." %
                         self._input_rule)
             else:
-                raise NotValidAggregationExpression("Error: Error in the field '%s'. Find not valid characters" %
+                raise NotValidAggregationExpression("Error: Error in the field '%s'. Invalid characters detected." %
                                                     field)
         if not self._check_unique_key_field(output_list):
             return output_list

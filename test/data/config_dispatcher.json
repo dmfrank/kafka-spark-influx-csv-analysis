@@ -1,6 +1,6 @@
 {
   "input": {
-    "data_structure": "config_data_structure.json",
+    "data_structure": "test/data/config_data_structure.json",
     "input_type": "kafka",
     "options": {
       "server": "192.168.1.1",
@@ -17,16 +17,22 @@
     }
   },
   "processing": {
-    "transformation": " packet_size; traffic: mult(packet_size,sampling_rate)",
+    "transformation": [
+      "packet_size",
+      "traffic: mul(packet_size, sampling_rate)"
+    ],
     "aggregations": {
-			"operation_type": "reduce",
- 			"rule": "Min(packet_size); Sum(traffic)"
-		}
+      "operation_type": "reduce",
+      "rule": [
+        "min(packet_size)",
+        "sum(traffic)"
+      ]
+    }
   },
   "analysis": {
     "historical": {
       "method": "mock",
-      "options":{
+      "options": {
         "deviation": 20
       }
     },

@@ -27,7 +27,7 @@ class TransformationCreator:
             if isinstance(ch, str):
                 args.append(row[self.mapping[ch]] if ch in self.mapping.keys() else int(ch))
             else: # ch has type syntax tree
-                operation = self.transformation_operations.operations_dict[ch.operation]["lambda"]
+                operation = self.transformation_operations.operations_dict[ch.operation].func
                 args.append(operation(*self.__generate_params_list(ch.children,row)))
         return args
 
@@ -35,7 +35,7 @@ class TransformationCreator:
         return lambda row: row[index]
 
     def _make_operation_lambda(self, syntax_tree):
-        operation = self.transformation_operations.operations_dict[syntax_tree.operation]["lambda"]
+        operation = self.transformation_operations.operations_dict[syntax_tree.operation].func
 
         return lambda row: operation(*self.__generate_params_list(syntax_tree.children, row))
 

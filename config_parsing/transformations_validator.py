@@ -14,71 +14,55 @@
 
 import re
 
-import pyspark.sql.types as types
+from pyspark.sql.types import *
 
 from errors import errors
 from .transformations_parser import FieldTransformation
 
 
-class TransformatoinsValidator:
+class TransformationsValidator:
     def __init__(self, transformation_operations, data_structure_pyspark):
         self.current_fields = data_structure_pyspark
         self.transformation_operations = transformation_operations
 
     def __get_field(self, field):
         try:
-            renamed_field = self.current_fields[field]
-            return renamed_field
+            return self.current_fields[field]
         except KeyError as ex:
-            raise errors.FieldNotExists("Field with name {} not exists".format(field))
+            raise errors.FieldNotExists("Field with name '{}' does not exists".format(field))
 
     def _validate_syntax_tree(self, tree):
+        if isinstance(tree, str):
+            f = tree.strip()
+            if re.search('^(\d+)$', f) is not None:  # it's long number
+                actual_type = LongType()
+            elif re.search('^(\d+\.\d+)$', f) is not None:  # it's float number
+                actual_type = FloatType()
+            else:  # it's field
+                renamed_field = self.__get_field(f)
+                actual_type = renamed_field.dataType
+            return actual_type
+
         operation = self.transformation_operations.operations_dict.get(tree.operation, None)
-        if operation is not None:
-            if len(tree.children) == operation["operands"]:
-                for index, ch in enumerate(tree.children):
-                    actual_type = None
-                    if isinstance(ch, str):  # number or field name
-                        result = re.search('^(\d+)$', ch)
-                        if result is not None:  # it's number
-                             actual_type = types.LongType()
-                        else:  # it's field
-                            renamed_field = self.__get_field(ch)
-                            actual_type = renamed_field.dataType
-                    else:  # it's other syntax tree, we should extract operation, get type and verify
-                        subtree_operation = self.transformation_operations.operations_dict.get(ch.operation, None)
-                        if subtree_operation:
-                            actual_type = subtree_operation["result"]
-                        else:
-                            raise errors.OperationNotSupportedError("Operation {} not supported".format(ch.operation))
 
-                        self._validate_syntax_tree(ch)
+        if operation is None:
+            raise errors.OperationNotSupportedError("Operation '{}' is not supported.".format(tree.operation))
 
+        if operation.op_count != len(tree.children):
+            raise errors.IncorrectArgumentsAmountForOperationError("Operation '{}' expects {} arguments.".format(operation, operation.op_count))
 
-                    if actual_type != operation["types"][index]:
-                        raise errors.IncorrectArgumentTypeForOperationError(
-                            "Operand {} expect operands with type {}, but {} has type {}".format(tree.operation,
-                                                                                                 operation["types"][index],
-                                                                                                 ch,
-                                                                                                 actual_type))
-                return operation["result"]
-            else:
-                raise errors.IncorrectArgumentsAmountForOperationError(
-                    "Operand {} expect {} operands, but actual {}".format(tree.operation, operation["operands"],
-                                                                          len(tree.children)))
-        else:
-            raise errors.OperationNotSupportedError("Operation {} not supported".format(tree.operation))
+        return operation.result_type(list(map(lambda ch: self._validate_syntax_tree(ch), tree.children)))
 
     def validate(self, transformations):
         new_fields = []
         for transformation in transformations:
             if isinstance(transformation, FieldTransformation):  # it's transformed name
                 if isinstance(transformation.operation, str):  # it's rename
-                    renamed_field = self.__get_field(transformation.operation)
-                    new_fields.append(types.StructField(transformation.field_name, renamed_field.dataType))
+                    field = self.__get_field(transformation.operation)
+                    new_fields.append(StructField(transformation.field_name, field.dataType))
                 else:  # is Syntaxtree
                     field_type = self._validate_syntax_tree(transformation.operation)
-                    new_fields.append(types.StructField(transformation.field_name, field_type))
+                    new_fields.append(StructField(transformation.field_name, field_type))
             else:  # no transforms
                 new_fields.append(self.__get_field(transformation))
-        return types.StructType(new_fields)
+        return StructType(new_fields)
