@@ -24,7 +24,7 @@
     "aggregations": {
       "operation_type": "reduceByKey",
       "rule": [
-        "key = src_ip",
+        "key: src_ip",
         "Sum(traffic)",
         "Sum(packet_size)"
       ]

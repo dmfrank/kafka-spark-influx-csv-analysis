@@ -20,8 +20,8 @@ class AggregationsParser:
     def __init__(self, config, input_data_structure):
         self._config = config.content["processing"]["aggregations"]
         self._input_rule = config.content["processing"]["aggregations"]["rule"]
-        self._regexp_reducefield = '\s*(\w+)\((\s*\w+\s*)\)\s*'
-        self._regexp_keyfield = '\s*(key)\s*\=(\s*\(*[\w\\,\s]*\s*\)*)\s*'
+        self._regexp_reduce_expr = '\s*(\w+)\((\s*\w+\s*)\)\s*'
+        self._regexp_key_expr = '\s*(key)\s*\:(\s*\(*[\w\\,\s]*\s*\)*)\s*'
         self._input_data_structure = input_data_structure
         self._expression = []
 
@@ -117,18 +117,18 @@ class AggregationsParser:
         output_list = []
         for field in separate_fields:
             if self._check_field_on_valid_characters(field):
-                residue_field = re.sub(self._regexp_reducefield, '', field)
-                residue_field = re.sub(self._regexp_keyfield, '', residue_field)
+                residue_field = re.sub(self._regexp_reduce_expr, '', field)
+                residue_field = re.sub(self._regexp_key_expr, '', residue_field)
                 residue_field = re.sub('\s+', '', residue_field)
                 if len(residue_field) == 0:
-                    re_match_list = re.findall(self._regexp_reducefield, field)
+                    re_match_list = re.findall(self._regexp_reduce_expr, field)
                     output_list.append(self._field_validation(re_match_list, field))
                 else:
                     raise NotValidAggregationExpression(
                         "Error: Error in the rule '%s'. Perhaps a semicolon is missing." %
                         self._input_rule)
             else:
-                raise NotValidAggregationExpression("Error: Error in the field '%s'. Find not valid characters" %
+                raise NotValidAggregationExpression("Error: Error in the field '%s'. Invalid characters detected." %
                                                     field)
         return output_list
 
@@ -146,7 +146,7 @@ class AggregationsParser:
         :param field: input field
         :return: true if field contain valid character and false at other case
         """
-        return not len(re.sub('[a-zA-Z0-9\(\)\_\s\=\,]', '', field)) > 0
+        return not len(re.sub('[a-zA-Z0-9\(\)\_\s\:\,]', '', field)) > 0
 
     def _parse_reduce_by_key(self):
         """
@@ -159,10 +159,10 @@ class AggregationsParser:
         output_list = []
         for field in separate_fields:
             if self._check_field_on_valid_characters(field):
-                re_match_list = re.findall(self._regexp_reducefield, field)
-                re_match_key_field = re.findall(self._regexp_keyfield, field)
-                residue_field = re.sub(self._regexp_reducefield, '', field)
-                residue_field = re.sub(self._regexp_keyfield, '', residue_field)
+                re_match_list = re.findall(self._regexp_reduce_expr, field)
+                re_match_key_field = re.findall(self._regexp_key_expr, field)
+                residue_field = re.sub(self._regexp_reduce_expr, '', field)
+                residue_field = re.sub(self._regexp_key_expr, '', residue_field)
                 residue_field = re.sub('\s+', '', residue_field)
                 if len(residue_field) == 0:
                     if re_match_key_field and not re_match_list and len(re_match_key_field):
@@ -187,7 +187,7 @@ class AggregationsParser:
                             else:
                                 output_list = list_expression
                         else:
-                            raise NotValidAggregationExpression("Error: Not uniqueness key field in rule '%s'." %
+                            raise NotValidAggregationExpression("Key field is not unique in rule '%s'." %
                                                                 self._input_rule)
                     elif not re_match_key_field and re_match_list:
                         expression = self._field_validation(re_match_list, field)
@@ -201,7 +201,7 @@ class AggregationsParser:
                         "Error: Error in the rule '%s'. Perhaps a semicolon is missing." %
                         self._input_rule)
             else:
-                raise NotValidAggregationExpression("Error: Error in the field '%s'. Find not valid characters" %
+                raise NotValidAggregationExpression("Error: Error in the field '%s'. Invalid characters detected." %
                                                     field)
         if not self._check_unique_key_field(output_list):
             return output_list

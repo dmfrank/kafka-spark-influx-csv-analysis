@@ -89,10 +89,18 @@ To run the application, you will need a configuration file. It is a json file wi
         }
     },
     "processing": {
-        "transformation": "src_country: country(src_ip);packet_size;traffic: mul(packet_size,sampling_rate)",
+        "transformation": [
+            "src_country: country(src_ip)",
+            "packet_size",
+            "traffic: mul(packet_size, sampling_rate)"
+        ],
         "aggregations": {
             "operation_type": "reduceByKey",
-            "rule": "key = src_country; Max(packet_size); Sum(traffic)"
+            "rule": [
+                "key: src_country",
+                "max(packet_size)",
+                "sum(traffic)"
+            ]
         }
     },
     "analysis": {

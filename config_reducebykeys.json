@@ -34,7 +34,7 @@
       "operation_type": "reduceByKey",
       "rule": [
         "Sum(traffic)",
-        "key = (src_country)",
+        "key: (src_country)",
         "Max(packet_size)"
       ]
     }
