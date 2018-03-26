@@ -50,16 +50,9 @@ esac
 shift 
 done
 
-if [ -z ${MASTER} ]
-then
-    echo "Error: set ip master use option --master"
-    exit
-fi
-
 if [ -z ${DEPS_DIR} ]
 then
-    echo "Error: set folder for dependencies use option --dependencies"
-    exit
+    DEPS_DIR="deps-build"
 fi
 
 BASE_DIR=$(pwd)
@@ -134,6 +127,14 @@ done
 
 DEPS=${DEPS:1}
 
-CMD="spark-submit --deploy-mode client --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.1.0 --py-files $DEPS --master $MASTER $APP_ARGS"
+CMD="spark-submit --deploy-mode client --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.1.0 --py-files $DEPS"
+
+if [ -n ${MASTER} ]
+then
+    CMD="$CMD --master $MASTER"
+fi
+
+CMD="$CMD $APP_ARGS"
+
 echo "Running $CMD"
 $CMD
