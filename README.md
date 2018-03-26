@@ -5,8 +5,6 @@
             1.1.2. Zookeeper
             1.1.3. Kafka
             1.1.4. Grafana
-            1.1.5. GeoLite2 
-            1.1.6. Sflow-producer
         1.2. Deployment
             1.2.1. Switch to the swarm mode
             1.2.2. Create a network
@@ -40,11 +38,6 @@ To download necessary docker images, run the following commands:
 * Kafka: `docker pull confluentinc/cp-kafka:3.0.0`
 * Grafana: `docker pull grafana/grafana`
 
-Additionally, in order for functions country(), city() and aarea() to work, you need to download geolite2 databases from the following page:
-`https://dev.maxmind.com/geoip/geoip2/geolite2/`
-
-Sflow-producer is a utility program for sending sflow data to Kafka. To build a docker image for it, run the following commands: `docker build -t sflow-producer sflow-producer/`
-
 ### Deployment
 * Switch to the swarm mode: `docker swarm init`
 * Create an overlay network: `docker network create --driver overlay --attachable=true network-name`
@@ -63,110 +56,62 @@ Sflow-producer is a utility program for sending sflow data to Kafka. To build a 
 To run the application, you will need a configuration file. It is a json file with the following structure:
 ```json
 {
-    "input": {
-        "input_type": "kafka",
-        "data_structure": "config_data_structure.json",
-        "options": {
-          "server": "zookeeper",
-          "port": 32181,
-          "consumer_group": "sflow-consumer",
-          "topic": "test",
-          "batchDuration": 10,
-          "sep": ","
-        }
-    },
-    "output": {
-        "method": "influx",
-        "options": {
-            "influx": {
-                "host":"sflow-store",
-                "port": 8086,
-                "username": "root",
-                "password": "root",
-                "database": "dev",
-                "measurement": "points"
-            }
-        }
-    },
-    "processing": {
-        "transformation": [
-            "src_country: country(src_ip)",
-            "packet_size",
-            "traffic: mul(packet_size, sampling_rate)"
-        ],
-        "aggregations": {
-            "operation_type": "reduceByKey",
-            "rule": [
-                "key: src_country",
-                "max(packet_size)",
-                "sum(traffic)"
-            ]
-        }
-    },
-    "analysis": {
-        "historical": {
-            "method": "influx",
-            "influx_options": {
-                "host": "localhost",
-                "port": 8086,
-                "username": "root",
-                "password": "root",
-                "database": "test3",
-                "measurement": "points"
-            }
-        },
-        "alert": {
-            "method": "kafka",
-            "option": {
-                "server": "localhost",
-                "port": 29092,
-                "topic": "testalert"
-            }
-        },
-        "accuracy": 3,
-        "rule": [
-            {
-                "module": "SimpleAnalysis",
-                "name": "SimpleAnalysis1",
-                "options": {
-                    "deviation": {
-                        "packet_size": 5,
-                        "traffic": 8
-                    },
-                    "batch_number": 1
-                }
-            },
-            {
-                "module": "SimpleAnalysis",
-                "name": "SimpleAnalysis2",
-                "options": {
-                    "deviation": {
-                        "packet_size": 5,
-                        "traffic": 3
-                    },
-                    "batch_number": 3
-                }
-            },
-            { 
-                "module": "AverageAnalysis",
-                "name": "AverageAnalysis",
-                "options": {
-                    "deviation": { "traffic": 4 },
-                    "num_average": 3
-                }
-            }
-        ]
-    },
-    "databases": {
-        "country": "./GeoLite2-Country.mmdb",
-        "city": "./GeoLite2-City.mmdb",
-        "asn": "./GeoLite2-ASN.mmdb"
+  "input": {
+    "input_type": "kafka",
+    "data_structure": "config_data_structure.json",
+    "options": {
+      "server": "zookeeper",
+      "port": 32181,
+      "consumer_group": "data-consumer",
+      "topic": "sensors-demo",
+      "batchDuration": 10,
+      "sep": ","
     }
+  },
+  "output": {
+    "method": "influx",
+    "options": {
+      "influx": {
+        "host": "data-store",
+        "port": 8086,
+        "username": "root",
+        "password": "root",
+        "database": "sensors",
+        "measurement": "points"
+      }
+    }
+  },
+  "processing": {
+    "transformation": [
+    "counter: one(timestamp)",
+    "sensor_id",
+    "sensor_type",
+    "rpm_min: rotation_speed",
+    "rpm_max: rotation_speed",
+    "rpm_sum: rotation_speed",
+    "speed_lt: lt(rotation_speed, 1000)",
+    "speed_gt: gt(rotation_speed, 4000)"
+    ],
+    "aggregations": {
+      "operation_type": "reduceByKey",
+      "rule": [
+    "key: (sensor_id, sensor_type)",
+    "max(rpm_max)",
+    "min(rpm_min)",
+    "sum(rpm_sum)",
+    "sum(speed_lt)",
+    "sum(speed_gt)",
+    "sum(counter)"
+      ]
+    }
+  },
+  "databases": {
+  }
 }
 ```
 File has 5 sections: 4 of them are mandatory (input, output, processing, databases) and 1 is optional (analysis). Sections are described in more detail below (all fields are mandatory).
 
-### Section input
+### Input Section
 This section describes how the application will receive data.
 
 * "input_type" - input data type, valid values: "csv", "kafka"
@@ -179,7 +124,7 @@ This section describes how the application will receive data.
     * "batchDuration" - data sampling window in seconds
     * "sep" - fields delimiter for received string
 
-### Section output
+### Output Section
 This section describes how the application will output data.
 
 * "method" - data output type, valid values: "csv", "influx"
@@ -191,14 +136,13 @@ This section describes how the application will output data.
     * "database": influxdb database name
     * "measurement": measurement name
 
-### Section processing
+### Processing Section
 This section specifies transformations and aggregations to be performed on the input data.
 
-* "transformation" - this string specifies transformation steps for every string received from the input source.
+* "transformation" - this array of strings specifies transformation steps for every string received from the input source.
 
-   User can rename the field (new_name: old_name), apply one of 7 functions: sum, div, mul, minus, country, city, aarea (src_country: country(src_ip)) or just use the field unchanged.
-
-   Nested operations (sum(mul(packet_size, sampling_rate), 1000)) are not supported at the moment.
+   User can rename the field (new_name: old_name), apply one of defined functions: 
+   sum, div, mul, sub, etc or just use the field unchanged.
 
    Each field declared in the transformation section should be subsequently used in aggregation, otherwise the application will raise exception.
    
@@ -208,16 +152,12 @@ This section specifies transformations and aggregations to be performed on the i
   
   The key can contain more than one field (key = (src_ip, dst_country, src_port_or_icmp_type)).
   
-  User can specify one of the 4 aggregation functions: Sum, Mul, Max, Min (Max(packet_size)).
+  User can specify one of defined aggregation functions: sum, mul, max, min.
 
-### Section databases
-This section specifies paths to databases which are necessary for the geo functions (country(), city(), aarea()) to work.
+### Databases Section
+This section specifies paths to databases which are necessary for the udf functions to work.
 
-* "country" - path to database for resolving country 
-* "city" - path to database for resolving city
-* "asn" - path to database for resolving asn
-
-### Section analysis
+### Analysis Section
 This section specifies rules for data analysis and ways to notify about detected anomalies.
 
 * Section "historical" is mandatory at the moment. It specifies that analysis will be based on historical data.
@@ -238,36 +178,9 @@ This section specifies rules for data analysis and ways to notify about detected
     * "name" - module name to be used in warning messages
     * "options" - settings to be passed to the class constructor. These are user defined and allow control over analysis behaviour
 
-## List of fields for transformations
-```
-   'timestamp',
-   'FLOW_indicator',
-   'agent_address',
-   'input_port',
-   'output_port',
-   'src_mac',
-   'dst_mac',
-   'ethernet_type',
-   'in_vlan',
-   'out_vlan', 
-   'src_ip', 
-   'dst_ip', 
-   'ip_protocol', 
-   'ip_tos', 
-   'ip_ttl', 
-   'src_port_or_icmp_type' 
-   'dst_port_or_icmp_code' 
-   'tcp_flags', 
-   'packet_size', 
-   'ip_size',
-   'sampling_rate
-
-```
-
 ## Running application
 When the infrastructure is deployed and the configuration file is ready, you can run the application. To build a docker image for the application run the following commands:
 
-* Build a base image for spark: `docker build -t bw-sw-spark docker/`
-* Build an image for the application: `docker build -t sflow-app .`
-* Run the application: `docker service create --name=app --mount type=bind,source=$PWD,destination=/configs --network=network-name sflow-app /configs/config_reducebykeys.json`
-    
+* Build a base image for spark: `docker build -t bw-sw-spark base-docker-image/`
+* Build an image for the application: `docker build -t processor-app .`
+* Run the application: `docker service create --name=app --mount type=bind,source=$PWD,destination=/configs --network=network-name processor-app /configs/config_reducebykeys.json`
