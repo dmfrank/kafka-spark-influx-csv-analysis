@@ -10,7 +10,6 @@
             1.2.2. Create a network
             1.2.3. Run Zookeeper
             1.2.4. Run Kafka
-            1.2.5. Run sflow-producer 
             1.2.6. Run Grafana
             1.2.7. Run Influxdb
     2. Configuration
@@ -43,12 +42,11 @@ To download necessary docker images, run the following commands:
 * Create an overlay network: `docker network create --driver overlay --attachable=true network-name`
 * Run Zookeeper: `docker service create --name=zookeeper --mount type=bind,source=/path/to/folder,destination=/var/lib/zookeeper/data -e ZOOKEEPER_CLIENT_PORT=32181 -e ZOOKEEPER_TICK_TIME=2000 --network=network-name confluentinc/cp-zookeeper:3.0.0`
 * Run Kafka: `docker service create --name=kafka --mount type=bind,source=/path/to/folder,destination=/var/lib/kafka/data -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:32181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092 --network=network-name confluentinc/cp-kafka:3.0.0`
-* Run sflow-producer: `docker run -d --rm --name=producer -e TOPIC=topic_name -e ZK=zookeeper:32181 -e BROKER=kafka:29092 -p 6343:6343/udp --network=network-name sflow-producer`
-* Run Grafana: `docker service create --name=sflow-view -p 3000:3000 --env GF_SECURITY_ADMIN_PASSWORD=your_password --network=network-name grafana/grafana`
+* Run Grafana: `docker service create --name=view -p 3000:3000 --env GF_SECURITY_ADMIN_PASSWORD=your_password --network=network-name grafana/grafana`
     
         login: admin, password: your_password
     
-* Run InfluxDB: `docker service create --name=sflow-store --mount type=bind,source=/path/to/folder,destination=/var/lib/influxdb --network=network-name influxdb`
+* Run InfluxDB: `docker service create --name=store --mount type=bind,source=/path/to/folder,destination=/var/lib/influxdb --network=network-name influxdb`
     
         login: root, password: root
 
@@ -72,7 +70,7 @@ To run the application, you will need a configuration file. It is a json file wi
     "method": "influx",
     "options": {
       "influx": {
-        "host": "data-store",
+        "host": "store",
         "port": 8086,
         "username": "root",
         "password": "root",
