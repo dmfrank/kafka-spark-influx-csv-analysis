@@ -4,7 +4,7 @@
     "options": {
       "server": "localhost",
       "port": 32181,
-      "consumer_group": "sflow-consumer",
+      "consumer_group": "data-consumer",
       "topic": "test",
       "batchDuration": 4,
       "sep": ","

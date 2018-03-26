@@ -26,13 +26,13 @@ class TestConfig():
 @skip("The method of optimal testing is not determined. Requires server start with kafka")
 class TestKafkaStreaming(TestCase):
     def test_getExutor(self):
-        config = TestConfig({"server": "localhost", "port": 29092, "topic": "sflow", "batchDuration": 4, "sep": ","})
+        config = TestConfig({"server": "localhost", "port": 29092, "topic": "data", "batchDuration": 4, "sep": ","})
         test_read = KafkaStreaming(config.content)
         test_executor = test_read.get_streaming_executor()
         self.assertIsInstance(test_executor, StreamingExecutor,
                               "When ruse kafka streaming executor should be instance of StreamingExecutor")
 
-        config = TestConfig({"server": "localhost", "port": 29091, "topic": "sflow", "batchDuration": 4, "sep": ","})
+        config = TestConfig({"server": "localhost", "port": 29091, "topic": "data", "batchDuration": 4, "sep": ","})
         with self.assertRaises(KafkaConnectError) as context:
             test_read = KafkaStreaming(config.content)
         self.assertTrue("Kafka error" in context.exception.args[0],

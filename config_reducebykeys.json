@@ -5,7 +5,7 @@
     "options": {
       "server": "zookeeper",
       "port": 32181,
-      "consumer_group": "sflow-consumer",
+      "consumer_group": "data-consumer",
       "topic": "sensors-demo",
       "batchDuration": 10,
       "sep": ","
@@ -15,7 +15,7 @@
     "method": "influx",
     "options": {
       "influx": {
-        "host": "sflow-store",
+        "host": "data-store",
         "port": 8086,
         "username": "root",
         "password": "root",
