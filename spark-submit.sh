@@ -127,13 +127,13 @@ cd $BASE_DIR
 echo "Application Arguments: '$APP_ARGS'"
 
 DEPS=""
-for f in "${DEPS_LIST[@]}"
+for f in $(ls $DEPS_DIR)
 do
         DEPS="$DEPS,$DEPS_DIR/$f"
 done
 
 DEPS=${DEPS:1}
-echo $DEPS
 
-spark-submit --deploy-mode client --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.1.0 \
---py-files $DEPS --master $MASTER $APP_ARGS
+CMD="spark-submit --deploy-mode client --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.1.0 --py-files $DEPS --master $MASTER $APP_ARGS"
+echo "Running $CMD"
+$CMD
