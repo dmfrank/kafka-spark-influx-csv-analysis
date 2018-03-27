@@ -44,19 +44,47 @@ To download necessary docker images, run the following commands:
 	docker swarm init
 	```
 
-* Create an overlay network: `docker network create --driver overlay --attachable=true network-name`
-* Run Zookeeper: `docker service create --name=zookeeper --mount type=bind,source=/path/to/folder,destination=/var/lib/zookeeper/data -e ZOOKEEPER_CLIENT_PORT=32181 -e ZOOKEEPER_TICK_TIME=2000 --network=network-name confluentinc/cp-zookeeper:3.0.0`
-* Run Kafka: `docker service create --name=kafka --mount type=bind,source=/path/to/folder,destination=/var/lib/kafka/data -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:32181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092 --network=network-name confluentinc/cp-kafka:3.0.0`
-* Run Grafana: `docker service create --name=view -p 3000:3000 --env GF_SECURITY_ADMIN_PASSWORD=your_password --network=network-name grafana/grafana`
+* Create an overlay network: 
+	
+	```bash
+	docker network create --driver overlay --attachable=true network-name
+	```
+* Run Zookeeper: 
+
+	```bash
+	docker service create --name=zookeeper --mount type=bind,source=/path/to/folder,destination=/var/lib/zookeeper/data \
+		-e ZOOKEEPER_CLIENT_PORT=32181 -e ZOOKEEPER_TICK_TIME=2000 --network=network-name confluentinc/cp-zookeeper:3.0.0
+	```
+
+* Run Kafka: 
+	
+	```bash
+	docker service create --name=kafka --mount type=bind,source=/path/to/folder,destination=/var/lib/kafka/data \
+		-e KAFKA_ZOOKEEPER_CONNECT=zookeeper:32181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092 \
+		--network=network-name confluentinc/cp-kafka:3.0.0
+	```
+
+* Run Grafana: 
+	
+	```bash
+	docker service create --name=view -p 3000:3000 --env GF_SECURITY_ADMIN_PASSWORD=your_password \
+		--network=network-name grafana/grafana
+	```
     
         login: admin, password: your_password
     
-* Run InfluxDB: `docker service create --name=influxdb --mount type=bind,source=/path/to/folder,destination=/var/lib/influxdb --network=network-name influxdb`
+* Run InfluxDB: 
+	
+	```bash
+	docker service create --name=influxdb --mount type=bind,source=/path/to/folder,destination=/var/lib/influxdb --network=network-name influxdb
+	```
     
         login: root, password: root
 
 ## Configuration
+
 To run the application, you will need a configuration file. It is a json file with the following structure:
+
 ```json
 {
   "input": {
