@@ -76,7 +76,8 @@ To download necessary docker images, run the following commands:
 * Run InfluxDB: 
 	
 	```bash
-	docker service create --name=influxdb --mount type=bind,source=/path/to/folder,destination=/var/lib/influxdb --network=network-name influxdb
+	docker service create --name=influxdb --mount type=bind,source=/path/to/folder,destination=/var/lib/influxdb \
+		--network=network-name influxdb
 	```
     
         login: root, password: root
