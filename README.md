@@ -185,6 +185,12 @@ Build a base image for spark:
 docker build -t bw-sw-spark base-docker-image/
 ```
 
+Run system tests to ensure everything is ok.
+
+```bash
+docker run --rm -v $(pwd):/project bw-sw-spark bash -c 'cd project && nosetests'
+```
+
 Build an image for the application: 
 
 ```bash
@@ -202,7 +208,7 @@ Run the application:
 
 ```bash
 
-docker service create --name=app --mount type=bind,source=$PWD,destination=/configs \
+docker service create --name=app --mount type=bind,source=$(pwd),destination=/configs \
 	--network=network-name processor-app /configs/config_reducebykeys.json
 ```
 
