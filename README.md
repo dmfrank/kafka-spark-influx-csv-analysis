@@ -256,6 +256,8 @@ python3 generator.py | docker run --network=network-name -i --rm confluentinc/cp
 
 ## Maintain influxdb
 
+You may need to drop series from influx or recreate new structure for data after changing configuration, use influxdb console for doing that.
+
 ```
 docker run -it --rm --network=networks-name influxdb influx -host influxdb
 ```
