@@ -38,7 +38,12 @@ To download necessary docker images, run the following commands:
 * Grafana: `docker pull grafana/grafana`
 
 ### Deployment
-* Switch to the swarm mode: `docker swarm init`
+* Switch to the swarm mode: 
+
+	```bash
+	docker swarm init
+	```
+
 * Create an overlay network: `docker network create --driver overlay --attachable=true network-name`
 * Run Zookeeper: `docker service create --name=zookeeper --mount type=bind,source=/path/to/folder,destination=/var/lib/zookeeper/data -e ZOOKEEPER_CLIENT_PORT=32181 -e ZOOKEEPER_TICK_TIME=2000 --network=network-name confluentinc/cp-zookeeper:3.0.0`
 * Run Kafka: `docker service create --name=kafka --mount type=bind,source=/path/to/folder,destination=/var/lib/kafka/data -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:32181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:29092 --network=network-name confluentinc/cp-kafka:3.0.0`
