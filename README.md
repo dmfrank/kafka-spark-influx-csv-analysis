@@ -46,7 +46,7 @@ To download necessary docker images, run the following commands:
     
         login: admin, password: your_password
     
-* Run InfluxDB: `docker service create --name=store --mount type=bind,source=/path/to/folder,destination=/var/lib/influxdb --network=network-name influxdb`
+* Run InfluxDB: `docker service create --name=influxdb --mount type=bind,source=/path/to/folder,destination=/var/lib/influxdb --network=network-name influxdb`
     
         login: root, password: root
 
@@ -70,7 +70,7 @@ To run the application, you will need a configuration file. It is a json file wi
     "method": "influx",
     "options": {
       "influx": {
-        "host": "store",
+        "host": "influxdb",
         "port": 8086,
         "username": "root",
         "password": "root",
@@ -220,3 +220,8 @@ python3 generator.py | docker run --network=network-name -i --rm confluentinc/cp
 	--broker-list kafka:29092 --topic sensors-demo
 ```
 
+## Maintain influxdb
+
+```
+docker run -it --rm --network=networks-name influxdb influx -host influxdb
+```
