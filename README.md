@@ -177,8 +177,40 @@ This section specifies rules for data analysis and ways to notify about detected
     * "options" - settings to be passed to the class constructor. These are user defined and allow control over analysis behaviour
 
 ## Running application
-When the infrastructure is deployed and the configuration file is ready, you can run the application. To build a docker image for the application run the following commands:
+When the infrastructure is deployed and the configuration file is ready, you can run the application running next steps. 
 
-* Build a base image for spark: `docker build -t bw-sw-spark base-docker-image/`
-* Build an image for the application: `docker build -t processor-app .`
-* Run the application: `docker service create --name=app --mount type=bind,source=$PWD,destination=/configs --network=network-name processor-app /configs/config_reducebykeys.json`
+Build a base image for spark: 
+
+```bash
+docker build -t bw-sw-spark base-docker-image/
+```
+
+Build an image for the application: 
+
+```bash
+docker build -t processor-app .
+```
+
+Create kafka topic: 
+
+```bash
+docker run --network=network-name --rm confluentinc/cp-kafka:3.0.0 kafka-topics --create \
+	--topic sensors-demo --partitions 1 --replication-factor 1 --if-not-exists --zookeeper zookeeper:32181
+```
+
+Run the application: 
+
+```bash
+
+docker service create --name=app --mount type=bind,source=$PWD,destination=/configs \
+	--network=network-name processor-app /configs/config_reducebykeys.json
+```
+
+Run sample data generator: 
+
+```bash
+
+python3 generator.py | docker run --network=network-name -i --rm confluentinc/cp-kafka:3.0.0 kafka-console-producer \
+	--broker-list kafka:29092 --topic sensors-demo
+```
+
