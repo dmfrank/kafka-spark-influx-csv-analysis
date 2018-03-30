@@ -81,13 +81,17 @@ class MathDiv(MapOperation):
     def __init__(self):
         super().__init__("mathdiv", 2, lambda x, y: x / float(y))
 
-    def result_type(self, arg_types = []):
+    def result_type(self, _ = []):
         return DoubleType()
 
 
 class Boolean(MapOperation):
-    def result_type(self, arg_types = []):
+    def result_type(self, _ = []):
         return BooleanType()
+
+class String(MapOperation):
+    def result_type(self, _ = []):
+        return StringType()
 
 
 class Cast(MapOperation):
@@ -95,7 +99,7 @@ class Cast(MapOperation):
         super().__init__(name, 1, function)
         self.ret_type = new_type
 
-    def result_type(self, arg_types = []):
+    def result_type(self, _ = []):
         return self.ret_type
 
 
@@ -139,6 +143,7 @@ class TransformationOperations:
         self.add(Boolean("neq", 2, lambda x,y: x != y))
         self.add(Boolean("or", 2, lambda x,y: x or y))
         self.add(Boolean("and", 2, lambda x,y: x and y))
+        self.add(String("concat", 2, lambda x, y: ''.join(map(str,[x,y]))))
 
         self.add(Cast("long",LongType(), lambda x: int(x)))
         self.add(Cast("int", IntegerType(), lambda x: int(x)))

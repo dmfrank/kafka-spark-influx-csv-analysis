@@ -64,15 +64,23 @@ class TransformationsParserTest(unittest.TestCase):
     def test__parse_transformation_types(self):
         parser = TransformationsParser([])
         self.assertIsInstance(parser._parse("1"), int,
-                              "Result should be an instance of int")
+                                "Result should be an instance of int")
         self.assertIsInstance(parser._parse("1.0"), float,
-                              "Result should be an instance of float")
+                                "Result should be an instance of float")
         self.assertIsInstance(parser._parse("True"), bool,
-                              "Result should be an instance of bool")
+                                "Result should be an instance of bool")
         self.assertIsInstance(parser._parse("False"), bool,
-                              "Result should be an instance of bool")
-        self.assertIsInstance(parser._parse("'FooBar'"), str,
-                              "Result should be an instance of bool")
+                                "Result should be an instance of bool")
+        self.assertIsInstance(parser._parse("Foo"), str,
+                                "Result should be an instance of str")
+        self.assertIsInstance(parser._parse("'Foo\'Bar'"), str,
+                                "Result should be an instance of str")
+        self.assertIsInstance(parser._parse("'Bar'"), str,
+                                "Result should be an instance of str")
+        self.assertIsInstance(parser._parse("4E+8"), float,
+                                "Result should be an instance of float")
+        self.assertIsInstance(parser._parse("'Foo\"bar'"), str,
+                                "Result should be an instance of str")
 
     def test__parse_simple_operation(self):
         config = TransformationsParserConfig(CONFIG_PATH)
@@ -191,12 +199,12 @@ class TransformationsParserTest(unittest.TestCase):
                 "{} element expanded transformation should has FieldTransformation type".format(index))
 
             self.assertEqual(
-                parser.expanded_transformation[index].field_name,
+                parser.expanded_transformation[index].name,
                 stub['run_test'][index]['field_name'],
                 "expanded_transformation[{}].field_name should be {}".format(
                     index,
                     stub["run_test"][index]["field_name"]))
 
-            self.assertIsInstance(parser.expanded_transformation[index].operation, stub["run_test"][index]["type"],
+            self.assertIsInstance(parser.expanded_transformation[index].body, stub["run_test"][index]["type"],
                                   'expanded_transformation[{}].operation should be instance of {}'.format(index, stub[
                                       "run_test"][index]["type"]))

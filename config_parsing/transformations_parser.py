@@ -18,9 +18,9 @@ from errors import errors
 
 
 class FieldTransformation:
-    def __init__(self, field_name, operation):
-        self.field_name = field_name  # new field name
-        self.operation = operation  # SyntaxTree or string
+    def __init__(self, field_name, field_body):
+        self.name = field_name  # new field name
+        self.body = field_body  # SyntaxTree or string
 
 
 class SyntaxTree:
@@ -44,11 +44,15 @@ class SyntaxTree:
 class TransformationsParser:
     def __init__(self, transformations):
         self.transformations = transformations
+        # can be either primitive type
+        # `int`, `str`, `float`, `bool`, 
+        #
         self.expanded_transformation = []  # string or FieldTransformation
 
     def _parse(self, args):
         result = re.search(r'(\w+)\((.*)\)', args)
         tree = SyntaxTree()
+        # operaiton
         if result is not None:
             tree.operation, arguments = result.groups()
             index, start_index, end_index = 0, 0, 0
@@ -91,12 +95,14 @@ class TransformationsParser:
                 tree.append_child(child)
 
             return tree
+        # field
         else:
             try:
                 val = ast.literal_eval(args)
-                if isinstance(val, (bool, int, float)):
+                if isinstance(val, (bool, int, float, str)):
                     return val
             except:
+                # return alias
                 return args
 
     def run(self):
@@ -108,11 +114,11 @@ class TransformationsParser:
                 self.expanded_transformation.append(transformation.strip())
             else:
                 # sum/minus/div and etc operations
-                operation, field_or_expression = list(map(
+                field_name, field_body = list(map(
                     lambda t: t.strip(),
                     transformation.split(":")))
                 self.expanded_transformation.append(
-                    FieldTransformation(operation, self._parse(field_or_expression)))
+                    FieldTransformation(field_name, self._parse(field_body)))
 
 
 class TransformationsParserConfig:
