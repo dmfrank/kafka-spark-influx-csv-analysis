@@ -52,7 +52,7 @@ class TransformationsParser:
     def _parse(self, args):
         result = re.search(r'(\w+)\((.*)\)', args)
         tree = SyntaxTree()
-        # operaiton
+        # operation
         if result is not None:
             tree.operation, arguments = result.groups()
             index, start_index, end_index = 0, 0, 0
@@ -100,6 +100,10 @@ class TransformationsParser:
             try:
                 val = ast.literal_eval(args)
                 if isinstance(val, (bool, int, float, str)):
+                    if tree.operation is None:
+                        tree.operation = "_" 
+                        tree.append_child(val) 
+                        return tree
                     return val
             except:
                 # return alias

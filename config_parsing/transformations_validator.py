@@ -23,6 +23,7 @@ class TransformationsValidator:
     def __init__(self, transformation_operations, data_structure_pyspark):
         self.current_fields = data_structure_pyspark
         self.transformation_operations = transformation_operations
+        self.stringQuote = "'"
 
     def __get_field(self, field):
         try:
@@ -36,8 +37,8 @@ class TransformationsValidator:
             _tree = tree.strip()
             # case "'foobar'" - str literal
             # case  "foobar"  - alias
-            if re.search('^\'\w+\'$', _tree) is not None or \
-                re.search('^\'\w+\'?\"?\w+\'$', _tree) is not None:
+            if _tree.startswith(self.stringQuote) and \
+                _tree.endswith(self.stringQuote):
                 actual_type = StringType()
             else:  # it's field
                 renamed_field = self.__get_field(_tree)
