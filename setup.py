@@ -23,6 +23,6 @@ setup(
         "geoip2==2.5.0",
         "influxdb==4.0.0",
         "kafka==1.3.3",
-        "nanotime==0.5.2"
+        "nanotime==0.5.2", 'pyspark'
     ],
 )
