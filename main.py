@@ -20,7 +20,7 @@ from dispatcher.dispatcher import Dispatcher
 if __name__ == "__main__":
     try:
         if len(sys.argv) != 2:
-            logging.critical("Invalid amount of arguments\nUsage: main.py config.json")
+            logging.critical("Invalid amount of arguments\nUsage: main.py <config.json>")
             exit(1)
 
         config = Config(sys.argv[1].strip())
