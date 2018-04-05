@@ -38,7 +38,7 @@ class TransformationsValidator:
             # case "'foobar'" - str literal
             # case  "foobar"  - alias
             if _tree.startswith(self.stringQuote) and \
-                    _tree.endswith(self.stringQuote):
+                _tree.endswith(self.stringQuote):
                 actual_type = StringType()
             else:  # it's field
                 renamed_field = self.__get_field(_tree)

@@ -179,7 +179,6 @@ class TransformationCreatorTestCase(TestCase):
         mult_syntax_tree = SyntaxTree()
         mult_syntax_tree.operation = "mul"
         mult_syntax_tree.children = [6, "packet_size"]
-
         mult_syntax_tree_root = SyntaxTree()
         mult_syntax_tree_root.operation = "concat"
         mult_syntax_tree_root.children = [
@@ -245,7 +244,6 @@ class TransformationCreatorTestCase(TestCase):
         st = SyntaxTree()
         st.operation = "add"
         st.children = [1.2E+5, 1.0]
-
         parsed_transformations = [
             FieldTransformation("sum", st)]
 
@@ -283,6 +281,7 @@ class TransformationCreatorTestCase(TestCase):
         transformations_validator = TransformationsValidator(
             operations, self.data_structure)
         _ = transformations_validator.validate(parsed_transformations)
+
         creator = TransformationCreator(self.data_structure, parsed_transformations,
                                         TransformationOperations())
 
@@ -308,7 +307,6 @@ class TransformationCreatorTestCase(TestCase):
         parser.run()
 
         operations = TransformationOperations()
-
         transformations_validator = TransformationsValidator(
             operations, self.data_structure)
         _ = transformations_validator.validate(parser.expanded_transformation)
@@ -326,13 +324,12 @@ class TransformationCreatorTestCase(TestCase):
         result = file.rdd.map(transformation)
 
         result = result.collect()
-
         self.assertListEqual(
             result, [(13,), (13,), (13,), (13,), (13,)],
             "List of tuples should be equal")
 
         spark.stop()
-
+        
     def test_build_lambda_processor_int_unsigned(self):
         parser = TransformationsParser(["dst_ip: +13"])
         parser.run()
@@ -372,6 +369,7 @@ class TransformationCreatorTestCase(TestCase):
         transformations_validator = TransformationsValidator(
             operations, self.data_structure)
         _ = transformations_validator.validate(parser.expanded_transformation)
+
         creator = TransformationCreator(self.data_structure, parser.expanded_transformation,
                                         TransformationOperations())
 

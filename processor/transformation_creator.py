@@ -33,15 +33,7 @@ class TransformationCreator:
                         ch.endswith(self.stringQuote):
                     args.append(ch)
                     continue
-            
                 args.append(row[self.mapping[ch]] if ch in self.mapping.keys() else int(ch))
-                # try:
-                #     ch_typed = ast.literal_eval(ch)
-                #     if isinstance(ch_typed, (bool, int, float, str)):
-                #         args.append(ch_typed)
-                # except:
-                #     args.append(row[self.mapping[ch]]
-                #                 if ch in self.mapping.keys() else int(ch))
             elif isinstance(ch, (bool, int, float)):
                 args.append(ch)
             else:

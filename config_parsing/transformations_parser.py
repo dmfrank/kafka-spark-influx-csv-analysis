@@ -112,7 +112,6 @@ class TransformationsParser:
                         tree.append_child(val) 
                         return tree
                     return val
-            # when not string but field_name
             except:
                 # return alias
                 return args
@@ -131,6 +130,7 @@ class TransformationsParser:
                     transformation.split(":")))
                 self.expanded_transformation.append(
                     FieldTransformation(field_name, self._parse(field_body, True)))
+
 
 
 class TransformationsParserConfig:
