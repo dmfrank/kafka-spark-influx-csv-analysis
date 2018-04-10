@@ -23,7 +23,9 @@ class Config:
             self.content = json.load(cfg)
         with open(self.content["input"]["data_structure"]) as cfg:
             data_structure = json.load(cfg)
-
+        with open(self.content["databases"]["config"]) as cfg:
+            cfg = json.load(cfg)
+        self.config = cfg
         self.data_structure = data_structure
         data_structure_list = list(
             map(lambda x: (x, data_structure[x]), data_structure.keys()))

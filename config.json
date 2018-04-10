@@ -15,7 +15,7 @@
     }
   },
   "processing": {
-    "transformation": "packet_size;traffic: mul(packet_size,sampling_rate)",
+    "transformation": "mul(packet_size,sampling_rate)",
     "aggregations": {
       "operation_type": "reduce",
       "rule": " Max(packet_size), Max(traffic)"
@@ -24,6 +24,7 @@
   "databases": {
     "country": "./GeoLite2-Country.mmdb",
     "city": "./GeoLite2-City.mmdb",
-    "asn": "./GeoLite2-ASN.mmdb"
+    "asn": "./GeoLite2-ASN.mmdb",
+    "config": "config.json"
   }
 }
