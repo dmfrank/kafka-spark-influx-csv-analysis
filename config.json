@@ -1,6 +1,7 @@
 {
   "input": {
     "input_type": "kafka",
+    "config": "config.json",
     "options": {
       "server": "176.120.25.195",
       "port": 29092,
@@ -19,12 +20,11 @@
     "aggregations": {
       "operation_type": "reduce",
       "rule": " Max(packet_size), Max(traffic)"
-	}
+    }
   },
   "databases": {
     "country": "./GeoLite2-Country.mmdb",
     "city": "./GeoLite2-City.mmdb",
-    "asn": "./GeoLite2-ASN.mmdb",
-    "config": "config.json"
+    "asn": "./GeoLite2-ASN.mmdb"
   }
 }
