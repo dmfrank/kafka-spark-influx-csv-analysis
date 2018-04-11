@@ -23,19 +23,27 @@ from output.writer_factory import WriterFactory
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), os.path.join("..", "data", "config.json"))
 INCORRECT_CONFIG_PATH = os.path.join(os.path.dirname(__file__), os.path.join("..", "data", "bad_config.json"))
-
+CONFIG_MOUTS_PATH = os.path.join(os.path.dirname(__file__), os.path.join("..", "data", "config_multiple_outputs.json"))
 
 class WriterFactoryTestCase(unittest.TestCase):
-    def test_instance_writer(self):
+    def test_get_writers(self):
         factory = WriterFactory()
         config = OutputConfig(CONFIG_PATH)
 
-        writer = factory.instance_writer(config, list(), list())
-        self.assertIsInstance(writer, StdOutWriter, "Writer should be instance of StdOutWriter")
+        writers = factory.get_writers(config, list(), list())
+        self.assertIsInstance(writers[0], StdOutWriter, "Writer should be instance of StdOutWriter")
 
-    def test_unsupported_output_format_exception_instance_writer(self):
+    def test_unsupported_output_format_exception_get_writers(self):
         factory = WriterFactory()
         config = OutputConfig(INCORRECT_CONFIG_PATH)
 
         with self.assertRaises(errors.UnsupportedOutputFormat):
-            factory.instance_writer(config, list(), list())
+            factory.get_writers(config, list(), list())
+
+    def test_multiple_outputs(self):
+        factory = WriterFactory()
+        config = OutputConfig(CONFIG_MOUTS_PATH)
+
+        writers = factory.get_writers(config, list(), list())
+        self.assertIsInstance(writers[0], StdOutWriter, "Writer should be instance of StdOutWriter")
+        self.assertIsInstance(writers[1], StdOutWriter, "Writer should be instance of StdOutWriter")
