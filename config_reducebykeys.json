@@ -1,7 +1,8 @@
 {
   "input": {
     "input_type": "kafka",
-    "data_structure": "config_data_structure.json",
+    "config": "./config.json",
+    "data_structure": "./config_data_structure.json",
     "options": {
       "server": "zookeeper",
       "port": 32181,
@@ -15,7 +16,7 @@
     "method": "influx",
     "options": {
       "influx": {
-        "host": "data-store",
+        "host": "10.0.0.6",
         "port": 8086,
         "username": "root",
         "password": "root",
@@ -26,25 +27,25 @@
   },
   "processing": {
     "transformation": [
-	"counter: one(timestamp)",
-	"sensor_id",
-	"sensor_type",
- 	"rpm_min: rotation_speed",
-	"rpm_max: rotation_speed",
-	"rpm_sum: rotation_speed",
-	"speed_lt: lt(rotation_speed, 1000)",
-	"speed_gt: gt(rotation_speed, 4000)"
+      "counter: one(timestamp)",
+      "sensor_id",
+      "sensor_type",
+      "rpm_min: rotation_speed",
+      "rpm_max: rotation_speed",
+      "rpm_sum: rotation_speed",
+      "speed_lt: lt(rotation_speed, 1000)",
+      "speed_gt: gt(rotation_speed, 4000)"
     ],
     "aggregations": {
       "operation_type": "reduceByKey",
       "rule": [
-	"key: (sensor_id, sensor_type)",
-	"max(rpm_max)",
-	"min(rpm_min)",
-	"sum(rpm_sum)",
-	"sum(speed_lt)",
-	"sum(speed_gt)",
-	"sum(counter)"
+        "key: (sensor_id, sensor_type)",
+        "max(rpm_max)",
+        "min(rpm_min)",
+        "sum(rpm_sum)",
+        "sum(speed_lt)",
+        "sum(speed_gt)",
+        "sum(counter)"
       ]
     }
   },

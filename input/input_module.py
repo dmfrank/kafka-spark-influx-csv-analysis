@@ -26,6 +26,7 @@ string_to_string = lambda x: x
 string_to_float = lambda x: float(x)
 string_to_boolean = lambda x: bool(x)
 
+
 def type_to_func(type_field):
     if type_field == IntegerType():
         return string_to_int
@@ -80,8 +81,8 @@ class ReadFactory():
         The getExecutor create executor depending input config file
         :return:
         """
-        if ("input" in self._config.content.keys()):
-            if (self._config.content["input"]["input_type"] == "kafka"):
+        if "input" in self._config.content.keys():
+            if self._config.content["input"]["input_type"] == "kafka":
                 return KafkaStreaming(self._config).get_streaming_executor()
             raise InputError("Error: {} unsuported input format. ReadFactory cannot create Executable".format(
                 self._config.content["input"]))
@@ -104,6 +105,8 @@ class KafkaStreaming(object):
         for name, file in config.content["databases"].items():
             sc.addFile(file)
 
+        # sc.addFile(config.content["input"]["config"])
+
         self._ssc = StreamingContext(sc, self._batchDuration)
 
         list_conversion_function = list((map(lambda x: type_to_func(x.dataType), config.data_structure_pyspark)))
@@ -111,7 +114,11 @@ class KafkaStreaming(object):
         functions_list = list(map(lambda x: lambda list_string: x[1](list_string[x[0]]), ranked_pointer))
         function_convert = lambda x: list(map(lambda func: func(x), functions_list))
         try:
-            dstream = KafkaUtils.createStream(self._ssc, "{0}:{1}".format(self._server, self._port), self._consumer_group, {self._topic: 1})
+            dstream = KafkaUtils.createStream(
+                self._ssc,
+                "{0}:{1}".format(self._server, self._port),
+                self._consumer_group,
+                {self._topic: 1})
             self._dstream = dstream.map(lambda x: function_convert(x[1].split(",")))
         except:
             raise KafkaConnectError("Kafka error: Connection refused: server={} port={} consumer_group={} topic={}".
@@ -122,4 +129,3 @@ class KafkaStreaming(object):
             getExecutable return Executor object
         """
         return StreamingExecutor(self._dstream, self._ssc)
-

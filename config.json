@@ -1,13 +1,15 @@
 {
   "input": {
     "input_type": "kafka",
-    "config": "config.json",
+    "config": "./config.json",
+    "data_structure": "./config_data_structure.json",
     "options": {
       "server": "176.120.25.195",
       "port": 29092,
       "topic": "testtag01",
       "batchDuration": 10,
-      "sep": ","
+      "sep": ",",
+      "consumer_group": "data-consumer"
     }
   },
   "output": {

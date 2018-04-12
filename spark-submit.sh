@@ -70,6 +70,8 @@ then
     exit 1
 fi
 
+cp $BASE_DIR/config*json $DEPS_DIR/
+
 if [[ ! -d 'dist' ]] || [[ $REPACK == 'true' ]]
 then
     python setup.py bdist_egg

@@ -27,11 +27,10 @@ INCORRECT_CONFIG1_PATH = os.path.join(os.path.dirname(__file__), os.path.join(".
 INCORRECT_CONFIG2_PATH = os.path.join(os.path.dirname(__file__), os.path.join("..", "data", "bad2_input_config.json"))
 
 
-
 class ReadFactoryTestCase(unittest.TestCase):
     @mock.patch('input.input_module.KafkaUtils', autospec=True)
     @mock.patch('pyspark.sql.session.SparkSession', autospec=True)
-    def test_getExutor(self, mock_sparksession, mock_kafka_utils):
+    def test_getExecutor(self, mock_sparksession, mock_kafka_utils):
         mock_context = MagicMock()
         mock_context.addFile.return_value = "test"
         mock_spark = MagicMock()
@@ -51,8 +50,7 @@ class ReadFactoryTestCase(unittest.TestCase):
         self.assertIsInstance(test_executor, StreamingExecutor,
                               "When read csv file executor should be instance of BatchExecutable")
 
-
-    def test_exeption_on_error1_in_input_config(self):
+    def test_exception_on_error1_in_input_config(self):
         config = InputConfig(INCORRECT_CONFIG1_PATH)
         factory = ReadFactory(config)
 
@@ -62,7 +60,7 @@ class ReadFactoryTestCase(unittest.TestCase):
         self.assertTrue("Some option was miss" in context.exception.args[0],
                         "Catch exeception, but it differs from test exception")
 
-    def test_exeption_on_error2_in_input_config(self):
+    def test_exception_on_error2_in_input_config(self):
         config = InputConfig(INCORRECT_CONFIG2_PATH)
         factory = ReadFactory(config)
 

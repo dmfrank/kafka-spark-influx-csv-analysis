@@ -1,6 +1,7 @@
 {
   "input": {
     "method": "csv",
+    "config": "bad_config.json",
     "options": {
       "csv": {
         "path": "data/input/test.csv",
