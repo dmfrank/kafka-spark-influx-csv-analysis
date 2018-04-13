@@ -21,7 +21,10 @@ class ConfigReader():
         self.path = path
         self.content = content
 
-    @lru_cache(maxsize=128)
+    '''
+    :param maxsize: is the number of key in cache
+    '''
+    @lru_cache(maxsize=32768)
     def read(self):
         head, *tail = self.path[1:-1].split(".")
         self.obj = self.content.get(head)

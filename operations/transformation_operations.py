@@ -88,18 +88,45 @@ class MathDiv(MapOperation):
 
 
 class EmptyOperation(UnarySameTypeOperation):
+    """
+    Empty or hidden transformation operator implementation
+    Due to al transformation has an operation
+    there are case of passing literals to transformation
+    """
     def __init__(self):
         super().__init__("_", lambda x: x.strip("'") if isinstance(x, str) else x)
 
     def result_type(self, arg_types=[]):
+        """
+        :param arg_types: Slice of types to return
+        :return:  Returns the type of literal that was passed
+        """
         return arg_types[0]
 
 
 class ConfigOperation(UnarySameTypeOperation):
+    """
+    Configuration class implements `config()` transformation method
+    Usage of method in transformation block:
+        "processing": {
+            "transformation": "config('path.to.field.inside.config.file')"
+    Example:
+        "processing": {
+            "transformation": "config('input.input_type')" }
+        reflects to:
+        "processing": {
+            "transformation": "kafka" }
+    config('path') can be nested like : "concat('source - ', config('input.input_type')"
+        -> "source - kafka"
+    """
     def __init__(self, content):
         super().__init__("config", lambda field_path: config_operations.ConfigReader(field_path, content).read())
 
     def result_type(self, arg_types=[]):
+        """
+        :param arg_types: Slice of types to return
+        :return: Returns type of transformation result
+        """
         return arg_types[0]
 
 
