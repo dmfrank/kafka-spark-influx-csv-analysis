@@ -19,15 +19,14 @@ from .influx_writer import InfluxWriter
 
 
 class WriterFactory:
-    def instance_writer(self, output_config, struct, enumerate_input_field):
-        output = output_config.content["output"]
+    def get_writers(self, output_config, struct, enumerate_input_field):
+        return [self.get_writer(o, struct, enumerate_input_field) for o in output_config.content["outputs"]]
+        
+    def get_writer(self, output, struct, enumerate_input_field):
         if output["method"] == "influx":
-            client = InfluxDBClient(output["options"]["influx"]["host"], output["options"]["influx"]["port"],
-                                    output["options"]["influx"]["username"], output["options"]["influx"]["password"],
-                                    output["options"]["influx"]["database"])
-
-            return InfluxWriter(client, output["options"]["influx"]["database"],
-                                output["options"]["influx"]["measurement"], struct, enumerate_input_field)
+            conf = output["options"]["influx"]    
+            client = InfluxDBClient(conf["host"], conf["port"], conf["username"], conf["password"], conf["database"])
+            return InfluxWriter(client, conf["database"], conf["measurement"], struct, enumerate_input_field)
         elif output["method"] == "stdout":
             return StdOutWriter()
 

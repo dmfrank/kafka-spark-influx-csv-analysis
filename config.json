@@ -11,7 +11,7 @@
       "consumer_group": "data-consumer"
     }
   },
-  "output": {
+  "outputs": {
     "method": "stdout",
     "options": {
     }

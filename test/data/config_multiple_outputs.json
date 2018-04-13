@@ -15,6 +15,11 @@
       "main": true,
       "method": "stdout",
       "options": {}
+   },
+   {
+      "main": true,
+      "method": "stdout",
+      "options": {}
    }],
    "processing": {
       "transformation": [
