@@ -1,8 +1,7 @@
 {
   "input": {
     "input_type": "kafka",
-    "config": "./config.json",
-    "data_structure": "./config_data_structure.json",
+    "data_structure": "config_data_structure.json",
     "options": {
       "server": "176.120.25.195",
       "port": 29092,

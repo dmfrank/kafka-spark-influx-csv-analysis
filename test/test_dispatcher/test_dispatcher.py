@@ -43,7 +43,7 @@ class DispatcherTestCase(unittest.TestCase):
 
         cfg = Config(CONFIG)
 
-        dispatcher = Dispatcher(cfg)
+        dispatcher = Dispatcher(cfg, CONFIG)
 
         self.assertIsInstance(
             dispatcher.executor,

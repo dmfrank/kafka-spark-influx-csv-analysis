@@ -21,6 +21,7 @@ class Config:
     def __init__(self, path_to_config):
         self.path = path_to_config
         path_head, _ = path.split(self.path)
+
         # load base config
         with open(path_to_config) as cfg:
             self.content = json.load(cfg)
@@ -29,9 +30,6 @@ class Config:
         with open(path.join(path_head, self.content["input"]["data_structure"])) as cfg:
             self.data_structure = json.load(cfg)
 
-        # load config with variables
-        with open(path.join(path_head, self.content["input"]["config"])) as cfg:
-            self.config = json.load(cfg)
         data_structure_list = list(
             map(lambda x: (x, self.data_structure[x]), self.data_structure.keys()))
         data_structure_sorted = sorted(

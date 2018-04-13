@@ -44,7 +44,7 @@ class ReadFactoryTestCase(unittest.TestCase):
         mock_kafka_utils.createDirectStream.return_value = mock_dstream
 
         config = Config(CONFIG_PATH)
-        factory = ReadFactory(config)
+        factory = ReadFactory(config, CONFIG_PATH)
         test_executor = factory.get_executor()
 
         self.assertIsInstance(test_executor, StreamingExecutor,
@@ -52,7 +52,7 @@ class ReadFactoryTestCase(unittest.TestCase):
 
     def test_exception_on_error1_in_input_config(self):
         config = InputConfig(INCORRECT_CONFIG1_PATH)
-        factory = ReadFactory(config)
+        factory = ReadFactory(config, INCORRECT_CONFIG1_PATH)
 
         with self.assertRaises(InputError) as context:
             factory.get_executor()
@@ -62,7 +62,7 @@ class ReadFactoryTestCase(unittest.TestCase):
 
     def test_exception_on_error2_in_input_config(self):
         config = InputConfig(INCORRECT_CONFIG2_PATH)
-        factory = ReadFactory(config)
+        factory = ReadFactory(config, INCORRECT_CONFIG2_PATH)
 
         with self.assertRaises(InputError) as context:
             factory.get_executor()

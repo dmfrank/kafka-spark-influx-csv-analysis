@@ -1,6 +1,5 @@
 {
   "input": {
-    "config": "config_aggregation.json",
     "method": "csv",
     "options": {
       "csv": {

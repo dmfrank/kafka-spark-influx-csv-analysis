@@ -39,7 +39,7 @@ case $key in
     shift
     ;;
     --help)
-    echo "example: ./spark-submit.sh --master spark://192.168.1.1:7077 --dependencies tmp main.py config.json"
+    echo "example: ./spark-submit.sh --master spark://192.168.1.1:7077 --dependencies tmp main.py $(pwd)/config.json"
     echo "set --repack true if you want repack existing packages"
     exit
     ;;
@@ -69,8 +69,6 @@ then
     echo "Failed to create $DEPS_DIR. Exit"
     exit 1
 fi
-
-cp $BASE_DIR/config*json $DEPS_DIR/
 
 if [[ ! -d 'dist' ]] || [[ $REPACK == 'true' ]]
 then
@@ -128,6 +126,15 @@ do
 done
 
 DEPS=${DEPS:1}
+
+
+CONFIGS=""
+for f in $(ls conf*json)
+do
+    CONFIGS="$CONFIGS,$f"
+done
+
+DEPS=$(sed 's/,//' <<< "${DEPS},${CONFIGS:1}")
 
 CMD="spark-submit --deploy-mode client --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.1.0 --py-files $DEPS"
 

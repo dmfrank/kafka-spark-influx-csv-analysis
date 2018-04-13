@@ -68,13 +68,14 @@ class ReadFactory():
     configuration/
     """
 
-    def __init__(self, input_config):
+    def __init__(self, input_config, file_config):
         """
         Create ReadFactory with set config file
 
         :param input_config: A object of Config class with input options
         """
         self._config = input_config
+        self._file_config = file_config
 
     def get_executor(self):
         """
@@ -83,14 +84,14 @@ class ReadFactory():
         """
         if "input" in self._config.content.keys():
             if self._config.content["input"]["input_type"] == "kafka":
-                return KafkaStreaming(self._config).get_streaming_executor()
+                return KafkaStreaming(self._config, self._file_config).get_streaming_executor()
             raise InputError("Error: {} unsuported input format. ReadFactory cannot create Executable".format(
                 self._config.content["input"]))
         raise InputError("Error: Some option was miss in config file. ReadFactory cannot create Executable")
 
 
 class KafkaStreaming(object):
-    def __init__(self, config):
+    def __init__(self, config, file_config):
 
         self._server = config.content["input"]["options"]["server"]
         self._port = config.content["input"]["options"]["port"]
@@ -102,10 +103,12 @@ class KafkaStreaming(object):
         self._spark = SparkSession.builder.appName("StreamingDataKafka").getOrCreate()
         sc = self._spark.sparkContext
 
+        # database files registration
         for name, file in config.content["databases"].items():
             sc.addFile(file)
 
-        # sc.addFile(config.content["input"]["config"])
+        # configuration file registration
+        sc.addFile(file_config)
 
         self._ssc = StreamingContext(sc, self._batchDuration)
 

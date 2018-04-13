@@ -1,6 +1,5 @@
 {
   "output": {
-    "config": "bad1_input_config.json",
     "input_type": "bin",
     "options": {
       "filename": "test/data/test.csv"

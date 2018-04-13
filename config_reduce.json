@@ -1,7 +1,6 @@
 {
   "input": {
     "input_type": "kafka",
-    "config": "./config_reduce.json",
     "options": {
       "server": "localhost",
       "port": 32181,
